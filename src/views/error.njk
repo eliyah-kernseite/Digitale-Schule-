@@ -1,0 +1,11 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">{{ code or 'Hinweis' }}</p>
+    <h1 class="h1">{{ title }}</h1>
+    <p class="lead">{{ message }}</p>
+    <p><a class="btn" href="/">Zur Startseite</a></p>
+  </div>
+</section>
+{% endblock %}

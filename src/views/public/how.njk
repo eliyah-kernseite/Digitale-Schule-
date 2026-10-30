@@ -1,0 +1,81 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<section class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">So funktioniert’s</p>
+    <h1 class="h1">Unterricht statt Unterhaltung.</h1>
+    <p class="lead">Hier erfährst du genau, wie die Schule abläuft: vom ersten Login bis zu deinem Zeugnis nach zwölf Wochen. Ohne Kleingedrucktes.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <ol class="timeline">
+      <li class="cut">
+        <span class="step-num">01</span>
+        <div>
+          <h2 class="h3">Mitglied werden</h2>
+          <p>Du legst ein Konto an, bestätigst deine E-Mail und schließt die Mitgliedschaft ab. Bezahlt wird sicher über unseren Zahlungsanbieter, wir sehen deine Kartendaten nie. Kündigen kannst du jederzeit zum Monatsende.</p>
+        </div>
+      </li>
+      <li class="cut">
+        <span class="step-num">02</span>
+        <div>
+          <h2 class="h3">Selbsttest in Woche 0</h2>
+          <p>Bevor es losgeht, schätzt du dich in fünf Bereichen ein: Klarheit, Selbstvertrauen, Disziplin, innere Ruhe und Zielfortschritt, jeweils von 1 bis 10. Dazu formulierst du dein persönliches Ziel. Das ist dein Ausgangspunkt.</p>
+        </div>
+      </li>
+      <li class="cut">
+        <span class="step-num">03</span>
+        <div>
+          <h2 class="h3">Seminar für Seminar</h2>
+          <p>Jedes Seminar ist ein kurzes Video deines Lehrers. Du kannst pausieren und Stellen wiederholen, die du schon gesehen hast, aber nicht vorspulen. Am Ende wartet eine Aufgabe: ein paar ehrliche Sätze oder eine Handlung, die du abhakst.</p>
+          <p class="muted">Warum so streng? Weil jedes Seminar auf dem vorherigen aufbaut. Wer überspringt, baut auf Sand.</p>
+        </div>
+      </li>
+      <li class="cut">
+        <span class="step-num">04</span>
+        <div>
+          <h2 class="h3">Freischalten durch Handeln</h2>
+          <p>Sobald du die Aufgabe abgibst, öffnet sich das nächste Seminar automatisch. Bereits erledigte Seminare kannst du jederzeit wieder ansehen.</p>
+        </div>
+      </li>
+      <li class="cut">
+        <span class="step-num">05</span>
+        <div>
+          <h2 class="h3">Routine und Community</h2>
+          <p>Im Zeugnis hakst du täglich deine Routine ab und baust einen Streak auf. In der Telegram-Community postest du montags dein Wochenziel und freitags dein Ergebnis.</p>
+        </div>
+      </li>
+      <li class="cut">
+        <span class="step-num">06</span>
+        <div>
+          <h2 class="h3">Dein Zeugnis in Woche 12</h2>
+          <p>Nach zwölf Wochen machst du den Selbsttest erneut. Dein Zeugnis stellt beide Ergebnisse gegenüber, zusammen mit deinen abgeschlossenen Seminaren und deinem Streak. Das ist Fortschritt, den du schwarz auf weiß siehst.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section-light">
+  <div class="wrap two-col">
+    <div>
+      <h2 class="h2">Was wir versprechen. Und was nicht.</h2>
+      <p>Wir versprechen dir Struktur, gute Inhalte und Lehrer, die ihr Fach ernst nehmen. Wir versprechen dir kein Einkommen, keine Heilung und keinen garantierten Erfolg. Die Lehren zu Themen wie Schwingung oder Manifestation vermitteln wir als Denkmodelle und Methoden, nicht als Wissenschaft.</p>
+    </div>
+    <div>
+      <h2 class="h2">Deine Daten bleiben deine.</h2>
+      <p>Deine Aufgaben sieht nur das Lehrerteam. Wir setzen nur technisch notwendige Cookies, verzichten auf Tracking und Werbung, und du kannst deine Daten jederzeit herunterladen oder dein Konto löschen.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap narrow">
+    <h2 class="h2">Häufige Fragen</h2>
+    {% include "partials/faq.njk" %}
+    <p class="actions"><a class="btn" href="/mitgliedschaft">Jetzt Mitglied werden</a></p>
+  </div>
+</section>
+{% endblock %}

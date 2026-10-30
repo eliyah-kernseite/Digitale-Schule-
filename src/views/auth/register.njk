@@ -1,0 +1,19 @@
+{% extends "auth/_layout.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% block side %}Der erste Schritt ist der wichtigste. Gut, dass du ihn gehst.{% endblock %}
+{% block form %}
+<h1 class="h2">Konto erstellen</h1>
+{{ showErrors(errors) }}
+<form method="post" action="/registrieren" class="stack" novalidate>
+  {{ csrf() }}
+  <label>Vorname<input name="first_name" value="{{ form.first_name }}" required minlength="2" maxlength="60" autocomplete="given-name"></label>
+  <label>E-Mail-Adresse<input type="email" name="email" value="{{ form.email }}" required maxlength="254" autocomplete="email"></label>
+  <label>Passwort <span class="muted small">(mindestens 10 Zeichen)</span><input type="password" name="password" required minlength="10" maxlength="200" autocomplete="new-password" data-strength></label>
+  <p class="strength small muted" aria-live="polite" hidden></p>
+  <label>Passwort wiederholen<input type="password" name="password2" required minlength="10" maxlength="200" autocomplete="new-password"></label>
+  <label class="check"><input type="checkbox" name="consent" required> <span>Ich habe die <a href="/agb" target="_blank" rel="noopener">AGB</a> und die <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen.</span></label>
+  <button class="btn btn-block" type="submit">Konto erstellen</button>
+</form>
+<p class="small">Schon dabei? <a href="/login">Zum Login</a></p>
+{% endblock %}
+

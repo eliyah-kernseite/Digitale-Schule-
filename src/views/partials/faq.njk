@@ -1,0 +1,8 @@
+<div class="faq">
+  {% for item in faq %}
+  <details>
+    <summary>{{ item[0] }}</summary>
+    <p>{{ item[1] }}</p>
+  </details>
+  {% endfor %}
+</div>

@@ -1,0 +1,7 @@
+{% extends "auth/_layout.njk" %}
+{% block form %}
+<h1 class="h2">Schau in dein Postfach.</h1>
+<p>Wenn mit {% if email %}<strong>{{ email }}</strong>{% else %}deiner Adresse{% endif %} alles passt, ist eine Mail mit einem Bestätigungslink unterwegs. Klick darauf, dann kannst du dich anmelden.</p>
+<p class="small muted">Nichts angekommen? Prüfe den Spam-Ordner. Der Link ist 48 Stunden gültig.</p>
+<p><a class="btn" href="/login">Zum Login</a></p>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf with context %}
+{% block app %}
+<header class="app-head"><h1 class="h1">Beiträge</h1><p><a class="btn btn-small" href="/admin/beitraege/neu">Neuer Beitrag</a></p></header>
+<table class="table">
+  <thead><tr><th>Titel</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for p in posts %}
+  <tr>
+    <td><a href="/admin/beitraege/{{ p.id }}">{{ p.title }}</a></td>
+    <td>{% if p.published_at %}veröffentlicht {{ p.published_at | date }} · <a href="/beitraege/{{ p.slug }}">ansehen</a>{% else %}Entwurf{% endif %}</td>
+    <td><form method="post" action="/admin/beitraege/{{ p.id }}/loeschen" class="inline-form" data-confirm="Beitrag wirklich löschen?">{{ csrf() }}<button class="btn-link" type="submit">Löschen</button></form></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

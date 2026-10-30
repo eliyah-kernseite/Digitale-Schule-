@@ -1,0 +1,31 @@
+{% macro errors(list) %}
+  {% if list and list.length %}
+  <div class="notice notice-warn" role="alert">
+    {% for e in list %}<p>{{ e }}</p>{% endfor %}
+  </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro csrf() %}<input type="hidden" name="_csrf" value="{{ csrfToken }}">{% endmacro %}
+
+{% macro stars(n) %}<span class="stars" aria-label="{{ n }} von 5 Sternen">{% for i in range(1, 6) %}<span class="{{ 'on' if i <= n else 'off' }}">★</span>{% endfor %}</span>{% endmacro %}
+
+{% macro progress(done, total, label) %}
+  <div class="progress">
+    <div class="progress-head"><span>{{ label }}</span><strong>{{ done }} von {{ total }}</strong></div>
+    <svg class="progress-bar" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
+      <rect x="0" y="0" width="100" height="6" class="track"/>
+      <rect x="0" y="0" width="{{ (done / total * 100) if total else 0 }}" height="6" class="fill"/>
+    </svg>
+  </div>
+{% endmacro %}
+
+{% macro ratingInput(name, current) %}
+  <fieldset class="rating-input">
+    <legend class="sr-only">Bewertung von 1 bis 5</legend>
+    {% for i in [5, 4, 3, 2, 1] %}
+      <input type="radio" id="{{ name }}-{{ i }}" name="{{ name }}" value="{{ i }}" {% if current == i %}checked{% endif %} required>
+      <label for="{{ name }}-{{ i }}" title="{{ i }} von 5">★</label>
+    {% endfor %}
+  </fieldset>
+{% endmacro %}

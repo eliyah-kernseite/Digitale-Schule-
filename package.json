@@ -1,0 +1,29 @@
+{
+  "name": "digitale-schule",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Die digitale Schule: Website, Mitgliederbereich, Abo-Zahlung und Adminbereich.",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test --test-concurrency=1 test/*.test.js",
+    "create-admin": "node --disable-warning=ExperimentalWarning scripts/create-admin.js",
+    "demo-videos": "node --disable-warning=ExperimentalWarning scripts/demo-videos.js",
+    "build:font": "python3 tools/font/build_font.py"
+  },
+  "dependencies": {
+    "express": "5.3.0",
+    "helmet": "8.3.0",
+    "multer": "2.5.0",
+    "nodemailer": "10.3.1",
+    "nunjucks": "3.2.4",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "@fontsource-variable/manrope": "5.2.8"
+  }
+}

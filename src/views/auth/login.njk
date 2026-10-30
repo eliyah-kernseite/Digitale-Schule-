@@ -1,0 +1,22 @@
+{% extends "auth/_layout.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% block side %}Willkommen zurück. Dein nächstes Seminar wartet.{% endblock %}
+{% block form %}
+<h1 class="h2">Login</h1>
+{{ showErrors(errors) }}
+<form method="post" action="/login" class="stack">
+  {{ csrf() }}
+  <input type="hidden" name="next" value="{{ next }}">
+  <label>E-Mail-Adresse<input type="email" name="email" value="{{ form.email }}" required maxlength="254" autocomplete="username"></label>
+  <label>Passwort<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label>
+  <button class="btn btn-block" type="submit">Einloggen</button>
+</form>
+<p class="small"><a href="/passwort-vergessen">Passwort vergessen?</a> · Neu hier? <a href="/registrieren">Konto erstellen</a></p>
+{% if showResend %}
+<form method="post" action="/bestaetigung-erneut" class="inline-form">
+  {{ csrf() }}
+  <input type="hidden" name="email" value="{{ form.email }}">
+  <button class="btn-link" type="submit">Bestätigungslink erneut senden</button>
+</form>
+{% endif %}
+{% endblock %}

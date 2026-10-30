@@ -1,0 +1,22 @@
+{% extends "layout/app.njk" %}
+{% block app %}
+<header class="app-head"><h1 class="h1">Adminbereich</h1><p class="muted">Zahlung: {{ paymentMode }}</p></header>
+<div class="stat-grid">
+  <a class="stat cut" href="/admin/mitglieder"><strong>{{ stats.users }}</strong><span>Konten</span></a>
+  <a class="stat cut" href="/admin/mitglieder"><strong>{{ stats.active }}</strong><span>aktive Abos</span></a>
+  <div class="stat cut"><strong>{{ stats.cancelling }}</strong><span>gekündigt, noch aktiv</span></div>
+  <a class="stat cut" href="/admin/aufgaben"><strong>{{ stats.submissions }}</strong><span>abgegebene Aufgaben</span></a>
+  <a class="stat cut" href="/admin/bewertungen"><strong>{{ stats.pendingReviews }}</strong><span>Bewertungen zu prüfen</span></a>
+  <a class="stat cut" href="/admin/warteliste"><strong>{{ stats.waitlist }}</strong><span>bestätigte Warteliste</span></a>
+  <a class="stat cut" href="/admin/kuendigungen"><strong>{{ stats.cancellations }}</strong><span>Kündigungen</span></a>
+</div>
+<section class="panel cut">
+  <h2 class="h3">Neueste Abgaben</h2>
+  <table class="table">
+    <thead><tr><th>Wann</th><th>Wer</th><th>Seminar</th></tr></thead>
+    <tbody>
+      {% for r in latest %}<tr><td>{{ r.submitted_at | date(true) }}</td><td>{{ r.first_name }}</td><td>{{ r.title }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Noch keine Abgaben.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

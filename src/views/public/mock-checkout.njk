@@ -1,0 +1,16 @@
+{% extends "layout/base.njk" %}
+{% from "partials/macros.njk" import csrf with context %}
+{% block main %}
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Testmodus</p>
+    <h1 class="h1">Testzahlung</h1>
+    <p class="lead">Diese Seite ersetzt im Entwicklungsmodus den Zahlungsanbieter. Es wird kein Geld bewegt. In Produktion ist sie nicht erreichbar.</p>
+    <form method="post" action="/mitgliedschaft/testzahlung" class="panel cut">
+      {{ csrf() }}
+      <p>Mitgliedschaft für 30 Tage freischalten.</p>
+      <button class="btn" type="submit">Testzahlung abschließen</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

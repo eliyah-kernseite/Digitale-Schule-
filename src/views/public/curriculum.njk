@@ -1,0 +1,16 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<section class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Lehrplan · {{ main.title }}</p>
+    <h1 class="h1">{{ main.level_title }}</h1>
+    <p class="lead">{{ total }} Seminare in {{ blocks.length }} Blöcken. Jedes Seminar endet mit einer Aufgabe. Das nächste öffnet sich erst, wenn du sie abgegeben hast.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    {% include "partials/curriculum-grid.njk" %}
+    <p class="actions"><a class="btn" href="/mitgliedschaft">Jetzt Mitglied werden</a> <a class="btn btn-ghost" href="/so-funktionierts">So funktioniert’s</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "layout/base.njk" %}
+{% from "partials/macros.njk" import csrf with context %}
+{% block main %}
+<section class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">{{ 'Fach · jetzt verfügbar' if subject.status == 'live' else 'Fach · bald verfügbar' }}</p>
+    <h1 class="h1">{{ subject.title }}</h1>
+    <p class="lead">{{ subject.tagline }}</p>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap two-col">
+    <div>
+      <h2 class="h3">Worum es geht</h2>
+      <p>{{ subject.description }}</p>
+      <h2 class="h3">{{ subject.level_title or 'Lehrplan' }}</h2>
+      <ol class="block-list block-list-plain">
+        {% for s in curriculum %}
+        <li><span class="num">{{ s.position | pad2 }}</span><span><strong>{{ s.title }}</strong>{% if s.summary %}<br><span class="muted small">{{ s.summary }}</span>{% endif %}</span></li>
+        {% endfor %}
+      </ol>
+    </div>
+    <div>
+      <article class="teacher teacher-stack cut">
+        <div class="teacher-photo" aria-hidden="true"><span>{{ subject.teacher_name | initial }}</span></div>
+        <p class="eyebrow">Lehrer</p>
+        <h2 class="h3">{{ subject.teacher_name }}</h2>
+        <p>{{ subject.teacher_bio }}</p>
+      </article>
+      {% if subject.status == 'live' %}
+        {% include "partials/membership-card.njk" %}
+      {% else %}
+        <form class="panel cut" method="post" action="/warteliste">
+          {{ csrf() }}
+          <input type="hidden" name="fach" value="{{ subject.slug }}">
+          <h2 class="h3">Auf die Warteliste</h2>
+          <p>Wir sagen dir Bescheid, sobald {{ subject.title }} startet. Eine Mail, kein Newsletter-Spam.</p>
+          <label>E-Mail-Adresse<input type="email" name="email" autocomplete="email" required maxlength="254"></label>
+          <label class="check"><input type="checkbox" name="consent" required> <span>Ich möchte per E-Mail über den Start informiert werden. Die Einwilligung kann ich jederzeit widerrufen (<a href="/datenschutz">Datenschutz</a>).</span></label>
+          <button class="btn" type="submit">Eintragen</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

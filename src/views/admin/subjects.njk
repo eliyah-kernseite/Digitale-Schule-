@@ -1,0 +1,23 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf with context %}
+{% block app %}
+<header class="app-head"><h1 class="h1">Fächer</h1><p class="muted">Ein Fach auf „live“ stellen, sobald seine Seminare veröffentlicht sind. Dann erscheint es bei allen Mitgliedern.</p></header>
+{% for s in subjects %}
+<form method="post" action="/admin/faecher/{{ s.id }}" class="panel cut stack">
+  {{ csrf() }}
+  <h2 class="h3">{{ s.title }} <span class="chip {% if s.status == 'live' %}chip-live{% endif %}">{{ s.status }}</span></h2>
+  <div class="form-grid">
+    <label>Titel<input name="title" value="{{ s.title }}" required maxlength="80"></label>
+    <label>Stufe<input name="level_title" value="{{ s.level_title }}" maxlength="80"></label>
+    <label>Status
+      <select name="status"><option value="live" {% if s.status == 'live' %}selected{% endif %}>live (buchbar, sichtbar)</option><option value="soon" {% if s.status == 'soon' %}selected{% endif %}>bald (Warteliste)</option></select>
+    </label>
+    <label>Lehrer<input name="teacher_name" value="{{ s.teacher_name }}" maxlength="80"></label>
+  </div>
+  <label>Kurzbeschreibung<input name="tagline" value="{{ s.tagline }}" maxlength="160"></label>
+  <label>Beschreibung<textarea name="description" rows="3" maxlength="2000">{{ s.description }}</textarea></label>
+  <label>Werdegang des Lehrers<textarea name="teacher_bio" rows="3" maxlength="1500">{{ s.teacher_bio }}</textarea></label>
+  <button class="btn btn-small" type="submit">Speichern</button>
+</form>
+{% endfor %}
+{% endblock %}

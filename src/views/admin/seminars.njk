@@ -1,0 +1,23 @@
+{% extends "layout/app.njk" %}
+{% block app %}
+<header class="app-head"><h1 class="h1">Seminare</h1><p class="muted">Ein Seminar ist für Mitglieder erst sichtbar, wenn es veröffentlicht ist. Dafür braucht es ein Video.</p></header>
+{% for subj in subjects %}
+<section class="panel cut">
+  <h2 class="h3">{{ subj.title }} <span class="chip {% if subj.status == 'live' %}chip-live{% endif %}">{{ subj.status }}</span></h2>
+  <table class="table">
+    <thead><tr><th>#</th><th>Block</th><th>Titel</th><th>Video</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for s in subj.seminars %}
+      <tr>
+        <td>{{ s.position }}</td><td>{{ s.block_title }}</td>
+        <td><a href="/admin/seminare/{{ s.id }}">{{ s.title }}</a></td>
+        <td>{% if s.video_file %}{{ s.video_duration | duration }}{% else %}<span class="muted">fehlt</span>{% endif %}</td>
+        <td>{{ 'veröffentlicht' if s.published else 'Entwurf' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <a class="btn btn-small" href="/admin/seminare/neu?fach={{ subj.id }}">Seminar hinzufügen</a>
+</section>
+{% endfor %}
+{% endblock %}

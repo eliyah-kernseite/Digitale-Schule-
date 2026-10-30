@@ -1,0 +1,15 @@
+{% extends "layout/base.njk" %}
+{% block bodyClass %}auth-page{% endblock %}
+{% block main %}
+<section class="section">
+  <div class="wrap auth-grid">
+    <div class="auth-side">
+      <p class="eyebrow">{{ schoolName }}</p>
+      <p class="display-sm">{% block side %}Jeder Tag, an dem du dranbleibst, zählt.{% endblock %}</p>
+    </div>
+    <div class="panel cut auth-panel">
+      {% block form %}{% endblock %}
+    </div>
+  </div>
+</section>
+{% endblock %}

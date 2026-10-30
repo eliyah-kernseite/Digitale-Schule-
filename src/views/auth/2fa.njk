@@ -1,0 +1,13 @@
+{% extends "auth/_layout.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% block form %}
+<h1 class="h2">Bestätigungscode</h1>
+<p>Gib den sechsstelligen Code aus deiner Authenticator-App ein.</p>
+{{ showErrors(errors) }}
+<form method="post" action="/login/2fa" class="stack">
+  {{ csrf() }}
+  <input type="hidden" name="next" value="{{ next }}">
+  <label>Code<input name="code" inputmode="numeric" pattern="[0-9 ]{6,7}" maxlength="7" autocomplete="one-time-code" required autofocus></label>
+  <button class="btn btn-block" type="submit">Bestätigen</button>
+</form>
+{% endblock %}
