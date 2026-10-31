@@ -1,0 +1,35 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import progress, stars with context %}
+{% from "partials/icons.njk" import icon %}
+{% block app %}
+<header class="app-head course-head">
+  <p class="muted small"><a href="/app/lehrgaenge">Lehrgänge</a> · {{ subject.level_title }}</p>
+  <h1 class="mega" data-reveal><span class="subject-icon">{{ icon(subject.slug) }}</span> {{ subject.title }}</h1>
+  {{ progress(done, total, 'Abgeschlossen') }}
+</header>
+{% for b in blocks %}
+<h2 class="block-title">{{ b.title }}</h2>
+<ol class="seminar-list">
+  {% for s in b.items %}
+  <li class="seminar-item is-{{ s.state }}" data-reveal>
+    <span class="seminar-state" aria-hidden="true">{% if s.state == 'done' %}{{ icon('check') }}{% elif s.state == 'open' %}{{ icon('play') }}{% else %}{{ icon('lock') }}{% endif %}</span>
+    <div class="seminar-info">
+      {% if s.state == 'locked' %}
+        <strong>{{ s.title }}</strong>
+        <span class="small muted">Gesperrt · öffnet nach Seminar {{ s.number - 1 }}</span>
+      {% else %}
+        <a href="/app/seminare/{{ s.id }}"><strong>{{ s.title }}</strong></a>
+        <span class="small muted">
+          Seminar {{ s.number }} · {{ s.video_duration | duration }} Min.
+          {% if s.state == 'done' %} · erledigt{% if s.avg_rating %} · Ø {{ s.avg_rating }} ★{% endif %}{% elif s.videoDone %} · Aufgabe offen{% elif s.watchedPercent %} · {{ s.watchedPercent }} % angesehen{% endif %}
+        </span>
+      {% endif %}
+    </div>
+    {% if s.state == 'open' %}<a class="btn btn-small" href="/app/seminare/{{ s.id }}">{{ 'Weiter' if s.watchedPercent else 'Start' }}</a>{% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p class="muted">Die Seminare werden gerade vorbereitet. Wir sagen dir Bescheid, sobald es losgeht.</p>
+{% endfor %}
+{% endblock %}

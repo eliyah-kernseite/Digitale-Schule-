@@ -5,12 +5,13 @@ const v = require('../validate');
 const { nowIso } = require('../db');
 
 const FAQ = [
-  ['Für wen ist die Schule?', 'Für Männer zwischen 18 und 40, die an sich arbeiten wollen und dafür eine klare Struktur suchen. Du brauchst kein Vorwissen, nur die Bereitschaft, die Aufgaben wirklich zu machen.'],
-  ['Wie viel Zeit brauche ich pro Woche?', 'Plane etwa zwei bis drei Stunden pro Woche ein: ein Seminar ansehen, die Aufgabe erledigen, kurz in der Community austauschen. Du lernst in deinem Tempo.'],
-  ['Warum kann ich Videos nicht vorspulen?', 'Weil Fortschritt nicht durch Überspringen entsteht. Jedes Seminar baut auf dem vorherigen auf. Bereits angesehene Stellen kannst du jederzeit erneut abspielen.'],
-  ['Wie und wann kann ich kündigen?', 'Jederzeit zum Ende des laufenden Abrechnungsmonats. Entweder mit einem Klick in deinem Konto oder ohne Login über „Verträge hier kündigen“ in der Fußzeile.'],
-  ['Wann starten Geld und Fitness?', 'Sobald die Inhalte unseren Ansprüchen genügen. Trag dich auf die Warteliste ein, dann sagen wir dir als Erstes Bescheid. Als Mitglied bekommst du neue Fächer ohne Aufpreis.'],
-  ['Versprecht ihr mir Erfolg?', 'Nein. Wir geben dir Struktur, Wissen und Aufgaben. Die Umsetzung liegt bei dir. Deshalb messen wir Fortschritt, nicht Versprechen.'],
+  ['Für wen ist die Schule?', 'Für Männer zwischen 18 und 40, die mehr aus ihrem Leben machen wollen: fitter, klarer im Kopf, finanziell unabhängiger, besser in Beziehungen. Du brauchst kein Vorwissen, nur die Bereitschaft, die Aufgaben wirklich zu machen.'],
+  ['Was kostet das?', 'Die Registrierung ist kostenlos und ohne Zahlungsdaten. Danach siehst du im Mitgliederbereich alle Lehrgänge und die Preise, bevor du irgendetwas bezahlst. Die Mitgliedschaft ist monatlich kündbar.'],
+  ['Wie viel Zeit brauche ich pro Woche?', 'Plane zwei bis drei Stunden pro Woche ein: ein Seminar ansehen, die Aufgabe erledigen, kurz mit den anderen austauschen. Du lernst in deinem Tempo.'],
+  ['Warum kann ich Videos nicht vorspulen?', 'Weil Fortschritt durch Überspringen nicht entsteht. Jedes Seminar baut auf dem vorherigen auf. Stellen, die du schon gesehen hast, kannst du jederzeit wiederholen.'],
+  ['Was ist der Telegram-Kreis?', 'Eine Gruppe und ein Kanal auf Telegram, nur für Mitglieder. Dort tauschst du dich mit anderen aus, postest deine Wochenziele und bekommst Zusatzinhalte der Lehrer. Du buchst ihn bei Bedarf zur Mitgliedschaft dazu.'],
+  ['Wie und wann kann ich kündigen?', 'Jederzeit zum Ende des laufenden Abrechnungsmonats. Mit einem Klick in deinem Konto oder ohne Login über „Verträge hier kündigen“ unten auf jeder Seite.'],
+  ['Versprecht ihr mir Erfolg?', 'Nein, und wer dir das verspricht, lügt. Wir geben dir Struktur, Wissen und Aufgaben. Umsetzen musst du selbst. Dein Zeugnis zeigt dir, was sich dadurch verändert.'],
 ];
 
 module.exports = function publicRoutes(ctx) {
@@ -35,15 +36,19 @@ module.exports = function publicRoutes(ctx) {
         ORDER BY r.created_at DESC LIMIT 6`,
     );
     const stats = db.get(`SELECT COUNT(*) AS n, ROUND(AVG(rating), 1) AS avg FROM reviews WHERE seminar_id IS NULL AND status = 'approved'`);
-    return { subjects, main, blocks, total: curriculum.length, reviews, reviewStats: stats };
+    const withCounts = subjects.map((s) => ({ ...s, count: learning.curriculum(s.id).length }));
+    return {
+      subjects: withCounts, main, blocks, total: curriculum.length, reviews, reviewStats: stats,
+      liveCount: subjects.filter((s) => s.status === 'live').length,
+    };
   }
 
   router.get('/', (req, res) => {
-    res.render('public/home.njk', { title: null, faq: FAQ.slice(0, 5), ...homeData() });
+    res.render('public/home.njk', { title: null, faq: FAQ, ...homeData() });
   });
 
   router.get('/faecher', (req, res) => {
-    res.render('public/subjects.njk', { title: 'Fächer', subjects: learning.subjects() });
+    res.render('public/subjects.njk', { title: 'Lehrgänge', ...homeData() });
   });
 
   router.get('/faecher/:slug', (req, res, next) => {
@@ -54,7 +59,7 @@ module.exports = function publicRoutes(ctx) {
   });
 
   router.get('/so-funktionierts', (req, res) => {
-    res.render('public/how.njk', { title: 'So funktioniert’s', faq: FAQ });
+    res.render('public/how.njk', { title: 'So läuft’s', faq: FAQ });
   });
 
   router.get('/lehrplan', (req, res) => {

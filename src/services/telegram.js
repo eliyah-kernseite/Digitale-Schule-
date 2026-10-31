@@ -4,12 +4,12 @@ const { nowIso } = require('../db');
 const { safeEqual } = require('../security/crypto');
 
 /**
- * Koppelt den Telegram-Zugang an das Abo:
+ * Koppelt den Telegram-Zugang an den Telegram-Zusatz des Abos:
  * - Mitglieder bekommen persönliche Einmal-Einladungslinks (1 Person, 1 Stunde gültig).
  * - Tritt jemand über so einen Link bei, merkt sich der Bot die Telegram-ID.
- * - Endet das Abo, entfernt der Bot die Person aus Gruppe und Kanal.
+ * - Endet das Abo oder der Zusatz, entfernt der Bot die Person aus Gruppe und Kanal.
  */
-function createTelegram({ db, cfg, logger = console, hasAccessById }) {
+function createTelegram({ db, cfg, logger = console, hasTelegramById }) {
   const t = cfg.telegram;
   const enabled = Boolean(t.botToken && (t.groupId || t.channelId));
 
@@ -58,7 +58,7 @@ function createTelegram({ db, cfg, logger = console, hasAccessById }) {
 
   /** Wird bei jeder Abo-Änderung aufgerufen. */
   function onAccessChange(userId) {
-    if (!enabled || hasAccessById(userId)) return;
+    if (!enabled || hasTelegramById(userId)) return;
     removeUser(userId).catch((err) => logger.warn(`[telegram] ${err.message}`));
   }
 
@@ -73,7 +73,7 @@ function createTelegram({ db, cfg, logger = console, hasAccessById }) {
     const match = /^u(\d{1,10})$/.exec(name || '');
     if (status === 'member' && match) {
       const userId = Number(match[1]);
-      if (!hasAccessById(userId)) {
+      if (!hasTelegramById(userId)) {
         await removeUserByTelegramId(cm.chat.id, tgUser);
         return 200;
       }
@@ -98,7 +98,7 @@ function createTelegram({ db, cfg, logger = console, hasAccessById }) {
   async function sweep() {
     if (!enabled) return;
     const rows = db.all('SELECT user_id FROM telegram_links WHERE telegram_user_id IS NOT NULL AND revoked_at IS NULL');
-    for (const row of rows) if (!hasAccessById(row.user_id)) await removeUser(row.user_id);
+    for (const row of rows) if (!hasTelegramById(row.user_id)) await removeUser(row.user_id);
   }
 
   return { enabled, inviteLinks, onAccessChange, handleUpdate, sweep, removeUser };

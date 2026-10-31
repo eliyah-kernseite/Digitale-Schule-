@@ -1,8 +1,16 @@
 {% extends "auth/_layout.njk" %}
 {% from "partials/macros.njk" import csrf, errors as showErrors with context %}
-{% block side %}Der erste Schritt ist der wichtigste. Gut, dass du ihn gehst.{% endblock %}
+{% from "partials/icons.njk" import icon %}
+{% block side %}Der erste Schritt ist der schwerste. Du gehst ihn gerade.{% endblock %}
+{% block sideExtra %}
+<ul class="ticks" data-reveal>
+  <li>{{ icon('check') }} Kostenlos und ohne Zahlungsdaten</li>
+  <li>{{ icon('check') }} Danach siehst du alle Lehrgänge und Preise</li>
+  <li>{{ icon('check') }} Deine Daten bleiben bei uns, kein Tracking</li>
+</ul>
+{% endblock %}
 {% block form %}
-<h1 class="h2">Konto erstellen</h1>
+<h1 class="h2">Kostenlos registrieren</h1>
 {{ showErrors(errors) }}
 <form method="post" action="/registrieren" class="stack" novalidate>
   {{ csrf() }}
@@ -12,7 +20,7 @@
   <p class="strength small muted" aria-live="polite" hidden></p>
   <label>Passwort wiederholen<input type="password" name="password2" required minlength="10" maxlength="200" autocomplete="new-password"></label>
   <label class="check"><input type="checkbox" name="consent" required> <span>Ich habe die <a href="/agb" target="_blank" rel="noopener">AGB</a> und die <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen.</span></label>
-  <button class="btn btn-block" type="submit">Konto erstellen</button>
+  <button class="btn btn-block btn-big" type="submit">Konto kostenlos erstellen</button>
 </form>
 <p class="small">Schon dabei? <a href="/login">Zum Login</a></p>
 {% endblock %}

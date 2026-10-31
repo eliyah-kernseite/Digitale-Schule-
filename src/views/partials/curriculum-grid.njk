@@ -1,13 +1,12 @@
 <div class="curriculum">
   {% for b in blocks %}
-  <section class="block cut">
-    <p class="block-num">Block {{ loop.index }}</p>
+  <section class="block cut" data-reveal>
     <h3 class="h3">{{ b.title }}</h3>
-    <ol class="block-list">
+    <ul class="block-list">
       {% for s in b.seminars %}
-      <li><span class="num">{{ s.position | pad2 }}</span><span>{{ s.title }}</span></li>
+      <li>{{ s.title }}</li>
       {% endfor %}
-    </ol>
+    </ul>
   </section>
   {% endfor %}
 </div>

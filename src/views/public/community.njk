@@ -1,21 +1,26 @@
 {% extends "layout/base.njk" %}
+{% from "partials/icons.njk" import icon %}
 {% block main %}
 <section class="page-head">
   <div class="wrap">
-    <p class="eyebrow">Community</p>
-    <h1 class="h1">Lerne nicht allein.</h1>
-    <p class="lead">Wachstum passiert schneller, wenn andere dich sehen. Unsere Community läuft über Telegram und ist nur für Mitglieder zugänglich.</p>
+    <h1 class="mega" data-reveal>Männer, die mitziehen.</h1>
+    <p class="lead" data-reveal>Allein gibst du an schlechten Tagen auf. Mit anderen an deiner Seite bleibst du dran. Deshalb gibt es den Telegram-Kreis, nur für Mitglieder.</p>
   </div>
 </section>
 <section class="section">
   <div class="wrap cards cards-3">
-    <article class="card cut"><h2 class="h3">Kanal der Lehrer</h2><p>Kurze Impulse, Zusatzinhalte und Antworten auf häufige Fragen. Exklusiv für Mitglieder.</p></article>
-    <article class="card cut"><h2 class="h3">Gruppe mit Themen</h2><p>Austausch nach Fächern sortiert. Du hilfst anderen und bekommst Hilfe, ohne Lärm und ohne Selbstdarstellung.</p></article>
-    <article class="card cut"><h2 class="h3">Feste Rituale</h2><p><strong>Montag:</strong> Wochenziel posten.<br><strong>Freitag:</strong> Ergebnis teilen. Verbindlichkeit macht den Unterschied.</p></article>
+    <article class="card card-glow cut" data-reveal data-glow><span class="subject-icon">{{ icon('bolt') }}</span><h2 class="h3">Kanal der Lehrer</h2><p>Kurze Impulse, Zusatzinhalte und Antworten auf die Fragen, die gerade alle haben.</p></article>
+    <article class="card card-glow cut" data-reveal data-glow><span class="subject-icon">{{ icon('users') }}</span><h2 class="h3">Gruppe nach Themen</h2><p>Fitness, Geld, Mindset, Beziehungen: Du hilfst anderen und bekommst Hilfe. Ohne Lärm und ohne Angeberei.</p></article>
+    <article class="card card-glow cut" data-reveal data-glow><span class="subject-icon">{{ icon('flame') }}</span><h2 class="h3">Feste Rituale</h2><p><strong>Montag:</strong> Wochenziel posten.<br><strong>Freitag:</strong> Ergebnis teilen. Wer sich festlegt, zieht durch.</p></article>
   </div>
   <div class="wrap narrow">
-    <p class="muted">Der Zugang wird an deine Mitgliedschaft gekoppelt: Du bekommst im Mitgliederbereich einen persönlichen Einladungslink. Endet die Mitgliedschaft, endet auch der Zugang zur Gruppe automatisch.</p>
-    <p><a class="btn" href="/mitgliedschaft">Mitglied werden</a></p>
+    <div class="steps-inline" data-reveal>
+      <span>{{ icon('users') }} Kostenlos registrieren</span>
+      <span>{{ icon('unlock') }} Mitgliedschaft freischalten</span>
+      <span>{{ icon('telegram') }} Telegram-Kreis dazubuchen</span>
+    </div>
+    <p class="muted" data-reveal>Deine Einladung ist persönlich und gilt nur einmal. Endet deine Mitgliedschaft oder der Telegram-Kreis, endet auch der Zugang zur Gruppe automatisch. So bleibt der Kreis unter Mitgliedern.</p>
+    <p data-reveal><a class="btn btn-big" href="/registrieren">Kostenlos starten {{ icon('arrow') }}</a></p>
   </div>
 </section>
 {% endblock %}

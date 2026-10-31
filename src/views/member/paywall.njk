@@ -1,0 +1,96 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% from "partials/icons.njk" import icon %}
+{% block app %}
+<header class="app-head paywall-head">
+  {% if sub and sub.status == 'canceled' %}
+    <h1 class="mega" data-reveal>Schön, dass du wieder da bist, {{ user.firstName }}.</h1>
+    <p class="lead" data-reveal>Deine Fortschritte sind gespeichert. Schalte die Schule wieder frei und mach genau dort weiter, wo du aufgehört hast.</p>
+  {% else %}
+    <h1 class="mega" data-reveal>Willkommen, {{ user.firstName }}. Ab hier wird’s ernst.</h1>
+    <p class="lead" data-reveal>Dein Konto steht. Schau dir in Ruhe an, was dich erwartet. Mit einer Mitgliedschaft öffnest du alle Lehrgänge auf einmal.</p>
+  {% endif %}
+  <div class="unlock-stats" data-reveal>
+    <span><strong data-count="{{ liveCount }}">{{ liveCount }}</strong> Lehrgänge</span>
+    <span><strong data-count="{{ seminarCount }}">{{ seminarCount }}</strong> Seminare</span>
+    <span><strong>1</strong> Zeugnis</span>
+  </div>
+</header>
+
+{% if aborted %}<p class="notice notice-warn">Die Zahlung wurde abgebrochen. Es wurde nichts berechnet.</p>{% endif %}
+
+<section class="locked-grid" aria-label="Das schaltest du frei">
+  {% for s in subjects %}
+  <article class="locked-card {% if s.status != 'live' %}is-soon{% endif %}" data-reveal data-glow>
+    <header>
+      <span class="subject-icon">{{ icon(s.slug) }}</span>
+      <div>
+        <h2 class="h4">{{ s.title }}</h2>
+        <p class="small muted">{% if s.status == 'live' %}{{ s.seminars.length }} Seminare{% else %}Startet bald, für Mitglieder ohne Aufpreis{% endif %}</p>
+      </div>
+      <span class="locked-badge">{{ icon('lock') }}</span>
+    </header>
+    <ul class="locked-list">
+      {% for sem in s.seminars %}{% if loop.index <= 4 %}<li>{{ icon('play') }} {{ sem.title }}</li>{% endif %}{% endfor %}
+      {% if s.seminars.length > 4 %}<li class="more">und {{ s.seminars.length - 4 }} weitere</li>{% endif %}
+    </ul>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="pricing" id="preise">
+  <h2 class="h1" data-reveal>Ein Preis. Alles drin.</h2>
+  {{ showErrors(errors) }}
+  {% if not user.emailVerified %}
+    <p class="notice notice-warn">Bitte bestätige zuerst deine E-Mail-Adresse. Den Link findest du in deinem Postfach.</p>
+  {% endif %}
+  <form method="post" action="/mitgliedschaft/checkout" class="pricing-grid" data-pricing data-base="{{ priceLabel }}" data-addon="{{ telegramPriceLabel }}">
+    {{ csrf() }}
+    <div class="price-card price-main cut" data-reveal>
+      <p class="price-name">Mitgliedschaft</p>
+      <p class="price"><span class="price-num">{{ priceLabel }}</span><span class="price-cur">€</span></p>
+      <p class="muted">{{ priceNote }}</p>
+      <ul class="ticks">
+        <li>{{ icon('check') }} Alle Lehrgänge und Seminare</li>
+        <li>{{ icon('check') }} Aufgaben mit Rückmeldung und persönliches Zeugnis</li>
+        <li>{{ icon('check') }} Routine-Tracker und Selbsttests</li>
+        <li>{{ icon('check') }} Neue Lehrgänge ohne Aufpreis</li>
+      </ul>
+    </div>
+
+    {% if telegramAddon %}
+    <label class="price-card price-addon cut" data-reveal>
+      <span class="addon-top">
+        <span class="tg-badge">{{ icon('telegram') }} Telegram-Kreis</span>
+        <span class="switch"><input type="checkbox" name="telegram" value="on" {% if telegramChosen %}checked{% endif %} data-addon-toggle><span aria-hidden="true"></span></span>
+      </span>
+      <span class="price"><span class="price-plus">+</span><span class="price-num">{{ telegramPriceLabel }}</span><span class="price-cur">€</span></span>
+      <span class="muted">pro Monat, jederzeit wieder abbestellbar</span>
+      <span class="ticks">
+        <span>{{ icon('check') }} Gruppe mit allen Mitgliedern</span>
+        <span>{{ icon('check') }} Kanal mit Zusatzinhalten der Lehrer</span>
+        <span>{{ icon('check') }} Wochenziele und Ergebnisse teilen</span>
+      </span>
+      <span class="sr-only">Telegram-Kreis dazubuchen</span>
+    </label>
+    {% endif %}
+
+    <div class="checkout cut" data-reveal>
+      <dl class="summary">
+        <div><dt>Konto</dt><dd>{{ user.email }}</dd></div>
+        <div><dt>Monatlich</dt><dd><strong data-total>{{ priceLabel }} €</strong> <span class="muted small" data-total-note>{{ 'inkl. Telegram-Kreis' if telegramChosen else '' }}</span></dd></div>
+      </dl>
+      <label class="check"><input type="checkbox" name="agb" required> <span>Ich habe die <a href="/agb" target="_blank" rel="noopener">AGB</a> und die <a href="/widerruf" target="_blank" rel="noopener">Widerrufsbelehrung</a> gelesen.</span></label>
+      <label class="check"><input type="checkbox" name="waiver" required> <span>Ich verlange ausdrücklich, dass ihr vor Ablauf der Widerrufsfrist mit der Leistung beginnt. Mir ist bekannt, dass mein Widerrufsrecht damit erlischt.</span></label>
+      <button class="btn btn-block btn-big" type="submit" {% if not user.emailVerified %}disabled{% endif %}>Zahlungspflichtig bestellen {{ icon('arrow') }}</button>
+      <p class="small muted">{% if paymentMock %}Testmodus: Es wird kein echtes Geld abgebucht.{% else %}Im nächsten Schritt gibst du deine Zahlungsdaten bei Stripe ein.{% endif %}</p>
+    </div>
+  </form>
+
+  <ul class="trust-row" data-reveal>
+    <li>{{ icon('exit') }}<span><strong>Monatlich kündbar</strong>mit einem Klick im Konto</span></li>
+    <li>{{ icon('card') }}<span><strong>Sichere Zahlung</strong>über Stripe, deine Karte sehen wir nie</span></li>
+    <li>{{ icon('eye') }}<span><strong>Keine versteckten Kosten</strong>der Preis ist der Preis</span></li>
+  </ul>
+</section>
+{% endblock %}

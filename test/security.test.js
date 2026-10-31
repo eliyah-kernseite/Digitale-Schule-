@@ -113,3 +113,12 @@ test('Rate-Limit greift bei vielen Login-Versuchen', async (t) => {
   for (let i = 0; i < 22; i += 1) last = await c.post('/login', { email: `x${i}@example.de`, password: 'irgendwas-langes' });
   assert.equal(last.status, 429);
 });
+
+test('Alle öffentlichen Seiten und Lehrgänge rendern ohne Fehler', async (t) => {
+  const app = await startApp();
+  t.after(() => app.stop());
+  const slugs = app.db.all('SELECT slug FROM subjects').map((s) => `/faecher/${s.slug}`);
+  for (const url of ['/', '/faecher', '/so-funktionierts', '/lehrplan', '/community', '/beitraege', '/registrieren', '/login', ...slugs]) {
+    assert.equal((await fetch(app.base + url)).status, 200, url);
+  }
+});

@@ -16,6 +16,8 @@ const NOTICES = {
   'abo-fortgesetzt': ['ok', 'Schön, dass du bleibst. Dein Abo läuft weiter.'],
   'abo-fehler': ['warn', 'Das hat nicht geklappt. Bitte versuche es später erneut oder schreib uns.'],
   'kein-zugang': ['warn', 'Für diesen Bereich brauchst du eine aktive Mitgliedschaft.'],
+  'telegram-gebucht': ['ok', 'Willkommen im Telegram-Kreis. Hol dir jetzt deine persönliche Einladung.'],
+  'telegram-beendet': ['ok', 'Der Telegram-Kreis ist beendet. Deine Mitgliedschaft läuft normal weiter.'],
   'gesperrt': ['warn', 'Dieses Seminar öffnet sich erst, wenn du die Aufgabe des vorherigen abgegeben hast.'],
   'video-zuerst': ['warn', 'Schau dir zuerst das ganze Seminar an. Danach kannst du die Aufgabe abgeben.'],
   'aufgabe-leer': ['warn', 'Deine Antwort ist noch zu kurz. Nimm dir einen Moment und schreib ein paar ehrliche Sätze.'],

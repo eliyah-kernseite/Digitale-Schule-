@@ -1,0 +1,28 @@
+{% extends "layout/app.njk" %}
+{% from "partials/icons.njk" import icon %}
+{% block app %}
+<header class="app-head">
+  <h1 class="mega" data-reveal>Lehrgänge</h1>
+  <p class="lead" data-reveal>Jeder Lehrgang läuft in fester Reihenfolge. Das nächste Seminar öffnet sich, sobald du die Aufgabe abgegeben hast.</p>
+</header>
+<div class="course-grid course-grid-lg">
+  {% for c in courses %}
+  <a class="course-card" href="/app/lehrgaenge/{{ c.subject.slug }}" data-reveal data-glow>
+    <span class="subject-icon">{{ icon(c.subject.slug) }}</span>
+    <strong class="h3">{{ c.subject.title }}</strong>
+    <span class="muted">{{ c.subject.tagline }}</span>
+    <span class="small">{% if c.finished %}{{ icon('check') }} Abgeschlossen{% elif c.total %}{{ c.done }} von {{ c.total }} Seminaren{% else %}Wird gerade vorbereitet{% endif %}</span>
+    <svg class="mini-bar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><rect class="track" width="100" height="4"/><rect class="fill" width="{{ (c.done / c.total * 100) if c.total else 0 }}" height="4"/></svg>
+    <span class="subject-go">{% if c.done %}Weitermachen{% else %}Starten{% endif %} {{ icon('arrow') }}</span>
+  </a>
+  {% endfor %}
+  {% for s in soon %}
+  <article class="course-card is-soon" data-reveal>
+    <span class="subject-icon">{{ icon(s.slug) }}</span>
+    <strong class="h3">{{ s.title }}</strong>
+    <span class="muted">{{ s.tagline }}</span>
+    <span class="small">Startet bald, für dich ohne Aufpreis</span>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

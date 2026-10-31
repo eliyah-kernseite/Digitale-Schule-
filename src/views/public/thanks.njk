@@ -2,9 +2,9 @@
 {% block main %}
 <section class="section">
   <div class="wrap narrow">
-    <p class="eyebrow">Willkommen</p>
     {% if active %}
-      <h1 class="h1">Du bist drin. Jetzt zählt der erste Schritt.</h1>
+      <div class="burst" aria-hidden="true">{% for i in range(0, 14) %}<i></i>{% endfor %}</div>
+      <h1 class="mega" data-reveal>Du bist drin. Jetzt zählt der erste Schritt.</h1>
       <p class="lead">Mach zuerst deinen Selbsttest für Woche 0. Er dauert zwei Minuten und ist der Ausgangspunkt für dein Zeugnis. Danach wartet Seminar 1.</p>
       <p class="actions"><a class="btn" href="/app/zeugnis#selbsttest">Selbsttest starten</a> <a class="btn btn-ghost" href="/app">Zur Übersicht</a></p>
     {% else %}

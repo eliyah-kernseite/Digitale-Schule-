@@ -16,6 +16,7 @@
       <div><dt>Status</dt><dd>{% if sub.cancel_at_period_end %}gekündigt, aktiv bis {{ sub.current_period_end | date }}{% elif sub.status == 'past_due' %}Zahlung offen, bitte Zahlungsmittel prüfen{% else %}aktiv{% endif %}</dd></div>
       {% if sub.current_period_end and not sub.cancel_at_period_end %}<div><dt>Nächste Verlängerung</dt><dd>{{ sub.current_period_end | date }}</dd></div>{% endif %}
       <div><dt>Mitglied seit</dt><dd>{{ sub.started_at | date }}</dd></div>
+      <div><dt>Monatlich</dt><dd>{{ priceLabel }} €{% if sub.telegram_addon %} + {{ telegramPriceLabel }} € Telegram-Kreis{% endif %}</dd></div>
     </dl>
     <div class="actions">
       {% if sub.cancel_at_period_end %}
@@ -23,13 +24,18 @@
       {% else %}
         <form method="post" action="/app/konto/abo/kuendigen" class="inline-form" data-confirm="Willst du dein Abo wirklich zum Ende des Zeitraums kündigen?">{{ csrf() }}<button class="btn btn-ghost" type="submit">Abo kündigen</button></form>
       {% endif %}
+      {% if sub.telegram_addon %}
+        <form method="post" action="/app/konto/telegram/beenden" class="inline-form" data-confirm="Telegram-Kreis wirklich beenden? Du verlierst den Zugang zu Gruppe und Kanal sofort.">{{ csrf() }}<button class="btn btn-ghost" type="submit">Telegram-Kreis beenden</button></form>
+      {% elif telegramAddon %}
+        <a class="btn btn-ghost" href="/app/community">Telegram-Kreis dazubuchen</a>
+      {% endif %}
       {% if sub.provider == 'stripe' %}
         <form method="post" action="/app/konto/abo/verwalten" class="inline-form">{{ csrf() }}<button class="btn btn-ghost" type="submit">Zahlungsmittel &amp; Rechnungen</button></form>
       {% endif %}
     </div>
   {% else %}
     <p>Du hast gerade keine aktive Mitgliedschaft.</p>
-    <a class="btn" href="/mitgliedschaft">Mitgliedschaft ansehen</a>
+    <a class="btn" href="/app/freischalten">Mitgliedschaft ansehen</a>
   {% endif %}
 </section>
 

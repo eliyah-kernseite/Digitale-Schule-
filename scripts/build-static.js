@@ -41,7 +41,7 @@ function relativize(html, route, exported) {
 
 function injectPreview(html, route) {
   const pre = prefixFor(route);
-  const banner = '<div class="preview-banner">Vorschau ohne Server: Login, Zahlung, Formulare und Videos funktionieren erst auf dem echten Server.</div>';
+  const banner = '<div class="preview-banner">Vorschau ohne Server: Registrieren und Login führen direkt in die Demo. Zahlung und Videos laufen erst auf dem echten Server.</div>';
   return html
     .replace(/<body([^>]*)>/, `<body$1>${banner}`)
     .replace('</body>', `<script src="${pre}js/static-preview.js"></script></body>`);
@@ -55,11 +55,11 @@ function injectPreview(html, route) {
 
   // Demo-Daten für den Mitgliederbereich
   const subject = db.get("SELECT id FROM subjects WHERE slug = 'persoenlichkeit'");
-  db.run("UPDATE seminars SET video_duration = 840, published = 1, chapters = ? WHERE subject_id = ?",
-    JSON.stringify([{ t: 0, title: 'Einstieg' }, { t: 300, title: 'Die Idee' }, { t: 620, title: 'Deine Aufgabe' }]), subject.id);
+  db.run("UPDATE seminars SET video_duration = 840, published = 1, chapters = ? WHERE subject_id IN (SELECT id FROM subjects WHERE status = 'live')",
+    JSON.stringify([{ t: 0, title: 'Einstieg' }, { t: 300, title: 'Die Idee' }, { t: 620, title: 'Deine Aufgabe' }]));
   const info = db.run("INSERT INTO users (email, password_hash, first_name, email_verified_at, created_at) VALUES ('demo@example.de', 'x', 'Jonas', ?, ?)", nowIso(), nowIso());
   const uid = info.lastInsertRowid;
-  db.run("INSERT INTO subscriptions (user_id, provider, status, current_period_end, started_at, updated_at) VALUES (?, 'mock', 'active', ?, ?, ?)",
+  db.run("INSERT INTO subscriptions (user_id, provider, subscription_id, status, current_period_end, started_at, updated_at) VALUES (?, 'mock', 'mock_sub_demo', 'active', ?, ?, ?)",
     uid, new Date(Date.now() + 20 * 86400000).toISOString(), nowIso(), nowIso());
   const seminars = db.all('SELECT * FROM seminars WHERE subject_id = ? ORDER BY position', subject.id);
   const answers = ['Körper okay, Geld knapp, Kopf voll. Ich will wieder Klarheit.', 'In zwölf Monaten: 10 kg leichter und ein eigenes Projekt gestartet.', 'Erledigt ✓', 'Ich bin nicht diszipliniert. Ich bin zu spät dran. Andere sind talentierter.'];
@@ -70,28 +70,41 @@ function injectPreview(html, route) {
   db.run('INSERT INTO seminar_progress (user_id, seminar_id, watched_seconds, last_beat_at) VALUES (?, ?, 310, 0)', uid, seminars[4].id);
   db.run("INSERT INTO self_tests VALUES (?, 0, 4, 3, 5, 4, 2, ?)", uid, new Date(Date.now() - 14 * 86400000).toISOString());
   db.run('INSERT INTO goals (user_id, text, updated_at) VALUES (?, ?, ?)', uid, '10 kg leichter und mein eigenes Projekt gestartet.', nowIso());
+  const fitness = db.all("SELECT s.* FROM seminars s JOIN subjects j ON j.id = s.subject_id WHERE j.slug = 'fitness' ORDER BY s.position");
+  fitness.slice(0, 2).forEach((s, i) => {
+    db.run('INSERT INTO seminar_progress (user_id, seminar_id, watched_seconds, last_beat_at, video_done_at) VALUES (?, ?, 840, 0, ?)', uid, s.id, nowIso());
+    db.run('INSERT INTO submissions (user_id, seminar_id, content, submitted_at) VALUES (?, ?, ?, ?)', uid, s.id, ['Liegestütze 18, Kniebeugen 30, Plank 45 Sekunden.', 'Erledigt ✓'][i], nowIso());
+  });
   const today = berlinDay();
   for (let i = 0; i < 9; i += 1) db.run('INSERT INTO routine_checkins (user_id, day) VALUES (?, ?)', uid, shiftDay(today, -i));
 
   let token = null;
   ctx.sessions.create({ cookie: (name, value) => { token = `${name}=${value}`; } }, uid);
 
+  // Zweiter Demo-Nutzer: frisch registriert, ohne Abo (sieht die Paywall)
+  const free = db.run("INSERT INTO users (email, password_hash, first_name, email_verified_at, created_at) VALUES ('neu@example.de', 'x', 'Leon', ?, ?)", nowIso(), nowIso());
+  let freeToken = null;
+  ctx.sessions.create({ cookie: (name, value) => { freeToken = `${name}=${value}`; } }, free.lastInsertRowid);
+
   const server = await new Promise((r) => { const s = app.listen(0, '127.0.0.1', () => r(s)); });
   const base = `http://127.0.0.1:${server.address().port}`;
 
   const posts = db.all('SELECT slug FROM posts WHERE published_at IS NOT NULL').map((p) => `/beitraege/${p.slug}`);
   const subjects = db.all('SELECT slug FROM subjects').map((s) => `/faecher/${s.slug}`);
+  const live = db.all("SELECT slug FROM subjects WHERE status = 'live'").map((s) => `/app/lehrgaenge/${s.slug}`);
   const publicRoutes = ['/', '/faecher', ...subjects, '/so-funktionierts', '/lehrplan', '/community', '/beitraege', ...posts,
-    '/mitgliedschaft', '/kuendigen', '/impressum', '/datenschutz', '/agb', '/widerruf', '/login', '/registrieren', '/passwort-vergessen'];
-  const memberRoutes = ['/app', '/app/seminare', `/app/seminare/${seminars[4].id}`, `/app/seminare/${seminars[0].id}`, '/app/zeugnis', '/app/community', '/app/konto'];
-  const exported = new Set([...publicRoutes, ...memberRoutes, '/vorschau']);
+    '/kuendigen', '/impressum', '/datenschutz', '/agb', '/widerruf', '/login', '/registrieren', '/passwort-vergessen'];
+  const memberRoutes = ['/app', '/app/lehrgaenge', ...live, `/app/seminare/${seminars[4].id}`, `/app/seminare/${seminars[0].id}`, '/app/zeugnis', '/app/community', '/app/konto'];
+  const freeRoutes = ['/app/freischalten'];
+  const exported = new Set([...publicRoutes, ...memberRoutes, ...freeRoutes, '/vorschau']);
 
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
 
-  for (const route of [...publicRoutes, ...memberRoutes]) {
+  for (const route of [...publicRoutes, ...memberRoutes, ...freeRoutes]) {
     const isMember = route.startsWith('/app');
-    const res = await fetch(base + route, { headers: isMember ? { cookie: token } : {}, redirect: 'manual' });
+    const cookie = freeRoutes.includes(route) ? freeToken : token;
+    const res = await fetch(base + route, { headers: isMember ? { cookie } : {}, redirect: 'manual' });
     if (res.status !== 200) throw new Error(`${route}: HTTP ${res.status}`);
     let html = await res.text();
     if (isMember) html = html.replace(/<html lang="de">/, '<html lang="de" data-demo="1">');
@@ -114,10 +127,14 @@ function injectPreview(html, route) {
 `);
   fs.writeFileSync(path.join(OUT, 'js', 'static-preview.js'), `(function () {
   'use strict';
-  // Vorschau: Formulare nicht abschicken, sondern kurz erklären.
+  // Vorschau: Registrieren und Login führen in die Demo, alles andere wird kurz erklärt.
   document.addEventListener('submit', function (e) {
     e.preventDefault();
-    window.alert('Das ist nur die Vorschau. Formulare, Login und Zahlung funktionieren erst auf dem echten Server.');
+    var action = e.target.getAttribute('action') || '';
+    var root = document.querySelector('link[rel=stylesheet]').getAttribute('href').split('css/main.css')[0];
+    if (action.slice(-13) === 'registrieren/') { window.location.href = root + 'app/freischalten/'; return; }
+    if (action.slice(-6) === 'login/') { window.location.href = root + 'app/'; return; }
+    window.alert('Das ist nur die Vorschau. Formulare und Zahlung funktionieren erst auf dem echten Server.');
   }, true);
   document.querySelectorAll('video').forEach(function (v) { v.removeAttribute('src'); });
 })();

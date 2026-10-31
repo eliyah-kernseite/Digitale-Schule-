@@ -39,6 +39,16 @@ function createLearning(db) {
     return true;
   }
 
+  /** Telegram-Kreis: Zusatz zum Abo. Admins und vom Team Freigeschaltete haben ihn immer. */
+  function hasTelegram(user) {
+    if (!hasAccess(user)) return false;
+    if (user.isAdmin || user.role === 'admin') return true;
+    const comp = user.compAccessUntil ?? user.comp_access_until;
+    if (comp && Date.parse(comp) > Date.now()) return true;
+    const sub = subscriptionOf(user.id);
+    return Boolean(sub && sub.telegram_addon);
+  }
+
   /* ---------- Fächer und Seminare ---------- */
 
   function subjects() {
@@ -233,7 +243,7 @@ function createLearning(db) {
   }
 
   return {
-    hasAccess, subscriptionOf, subjects, subjectBySlug, curriculum, course, courseSummary, openSeminar,
+    hasAccess, hasTelegram, subscriptionOf, subjects, subjectBySlug, curriculum, course, courseSummary, openSeminar,
     heartbeat, submitTask, selfTests, saveSelfTest, goal, saveGoal, checkIn, streak,
   };
 }

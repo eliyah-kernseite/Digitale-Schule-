@@ -37,13 +37,15 @@ function loadConfig(env = process.env) {
     secret: env.SESSION_SECRET || '',
     passwordCost: int(env.PASSWORD_COST, isTest ? 1024 : 32768),
     requireAdmin2fa: bool(env.REQUIRE_ADMIN_2FA, true),
-    priceLabel: env.PRICE_LABEL || '[Preis]',
+    priceLabel: env.PRICE_LABEL || '39',
     priceNote: env.PRICE_NOTE || 'pro Monat, monatlich kündbar',
+    telegramPriceLabel: env.TELEGRAM_PRICE_LABEL || '9',
     payment: {
       provider: env.PAYMENT_PROVIDER || (isProd ? 'stripe' : 'mock'),
       stripeSecretKey: env.STRIPE_SECRET_KEY || '',
       stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET || '',
       stripePriceId: env.STRIPE_PRICE_ID || '',
+      stripeTelegramPriceId: env.STRIPE_TELEGRAM_PRICE_ID || '',
       stripeApiBase: env.STRIPE_API_BASE || 'https://api.stripe.com',
     },
     mail: {

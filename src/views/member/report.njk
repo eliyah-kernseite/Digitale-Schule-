@@ -87,7 +87,7 @@
   {% for c in courses %}
     <p class="small muted">{{ c.subject.title }}: {{ c.done }} von {{ c.total }}</p>
     <ol class="done-list">
-      {% for s in c.items %}{% if s.state == 'done' %}<li><span class="num">{{ s.number | pad2 }}</span> {{ s.title }} <span class="small muted">· {{ s.submitted_at | date }}</span></li>{% endif %}{% endfor %}
+      {% for s in c.items %}{% if s.state == 'done' %}<li><span class="done-check">✓</span> {{ s.title }} <span class="small muted">· {{ s.submitted_at | date }}</span></li>{% endif %}{% endfor %}
     </ol>
   {% endfor %}
   <p><button class="btn btn-ghost btn-small" type="button" data-print>Zeugnis drucken</button></p>

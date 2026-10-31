@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   status                   TEXT NOT NULL,
   current_period_end       TEXT,
   cancel_at_period_end     INTEGER NOT NULL DEFAULT 0,
+  telegram_addon           INTEGER NOT NULL DEFAULT 0,
   started_at               TEXT,
   updated_at               TEXT NOT NULL
 );

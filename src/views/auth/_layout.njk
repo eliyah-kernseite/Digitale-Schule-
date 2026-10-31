@@ -4,8 +4,8 @@
 <section class="section">
   <div class="wrap auth-grid">
     <div class="auth-side">
-      <p class="eyebrow">{{ schoolName }}</p>
-      <p class="display-sm">{% block side %}Jeder Tag, an dem du dranbleibst, zählt.{% endblock %}</p>
+      <p class="mega" data-reveal>{% block side %}Jeder Tag, an dem du dranbleibst, zählt.{% endblock %}</p>
+      {% block sideExtra %}{% endblock %}
     </div>
     <div class="panel cut auth-panel">
       {% block form %}{% endblock %}
