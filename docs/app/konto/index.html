@@ -11,7 +11,7 @@
   <link rel="icon" href="../../img/icon.svg" type="image/svg+xml">
   
 </head>
-<body class="app-page"><div class="preview-banner">Vorschau ohne Server: Registrieren und Login führen direkt in die Demo. Zahlung und Videos laufen erst auf dem echten Server.</div>
+<body class="app-page"><div class="preview-banner">Vorschau ohne Server: Registrieren zeigt, was ein neues Konto sieht (Paywall). Login öffnet ein Demo-Mitglied mit Abo. Zahlung und Videos laufen erst auf dem echten Server.</div>
   <a class="skip" href="#inhalt">Zum Inhalt springen</a>
   <div class="scroll-bar" aria-hidden="true"></div>
   
@@ -19,7 +19,7 @@
   <a class="logo" href="../../app/"><svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M0 9 9 0h31v40H0z" fill="currentColor"/><path d="M13 9h16v6H19v4h8v6h-8v8h-6z" fill="var(--logo-cut, #0f0d0b)"/></svg><span class="logo-word">Fundament</span>
 </a>
   <form method="post" action="../../logout/" class="inline-form">
-    <input type="hidden" name="_csrf" value="Rg5oMJgYyNAEvN7DMjPdQAlyile-F8a2wow48_Ef9LM">
+    <input type="hidden" name="_csrf" value="_d3KIwMa4VY_BwO8-D20zHqz56RvMqAhwdMNpC79bWg">
     <button class="btn-link" type="submit">Abmelden</button>
   </form>
 </header>
@@ -33,9 +33,9 @@
   <nav class="app-nav" aria-label="Mitgliederbereich">
     
       <a href="../../app/" ><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5L4.5 13.5H12l-1 8 8.5-11H12z"/></svg><span>Übersicht</span></a>
-      <a href="../../app/lehrgaenge/" ><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5v15l12-7.5z"/></svg><span>Lehrgänge</span></a>
-      <a href="../../app/zeugnis/" ><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg><span>Mein Zeugnis</span></a>
-      <a href="../../app/community/" ><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6.5 2.5L18 7.5l-6.5 7.5V21l3.5-4.5 4 3z"/></svg><span>Community</span></a>
+      <a href="../../app/" ><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5v15l12-7.5z"/></svg><span>Lehrgänge</span></a>
+      <a href="../../app/" ><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg><span>Mein Zeugnis</span></a>
+      <a href="../../app/" ><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6.5 2.5L18 7.5l-6.5 7.5V21l3.5-4.5 4 3z"/></svg><span>Community</span></a>
       <a href="../../app/konto/" aria-current="page"><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="1"/><path d="M3 10h18M7 15h4"/></svg><span>Konto &amp; Abo</span></a>
       
     
@@ -50,31 +50,18 @@
 <section class="panel cut" id="abo">
   <h2 class="h3">Mitgliedschaft</h2>
   
-    <dl class="summary">
-      <div><dt>Status</dt><dd>aktiv</dd></div>
-      <div><dt>Nächste Verlängerung</dt><dd>20.11.2026</dd></div>
-      <div><dt>Mitglied seit</dt><dd>31.10.2026</dd></div>
-      <div><dt>Monatlich</dt><dd>39 €</dd></div>
-    </dl>
-    <div class="actions">
-      
-        <form method="post" action="../../app/konto/abo/kuendigen/" class="inline-form" data-confirm="Willst du dein Abo wirklich zum Ende des Zeitraums kündigen?"><input type="hidden" name="_csrf" value="Rg5oMJgYyNAEvN7DMjPdQAlyile-F8a2wow48_Ef9LM"><button class="btn btn-ghost" type="submit">Abo kündigen</button></form>
-      
-      
-        <a class="btn btn-ghost" href="../../app/community/">Telegram-Kreis dazubuchen</a>
-      
-      
-    </div>
+    <p>Du hast gerade keine aktive Mitgliedschaft.</p>
+    <a class="btn" href="../../app/">Mitgliedschaft ansehen</a>
   
 </section>
 
 <div class="dash-grid">
   <section class="panel cut">
     <h2 class="h3">Profil</h2>
-    <form method="post" action="../../app/konto/name/" class="stack">
-      <input type="hidden" name="_csrf" value="Rg5oMJgYyNAEvN7DMjPdQAlyile-F8a2wow48_Ef9LM">
-      <label>Vorname<input name="first_name" value="Jonas" required minlength="2" maxlength="60"></label>
-      <label>E-Mail<input value="demo@example.de" disabled></label>
+    <form method="post" action="../../app/" class="stack">
+      <input type="hidden" name="_csrf" value="_d3KIwMa4VY_BwO8-D20zHqz56RvMqAhwdMNpC79bWg">
+      <label>Vorname<input name="first_name" value="Leon" required minlength="2" maxlength="60"></label>
+      <label>E-Mail<input value="neu@example.de" disabled></label>
       <button class="btn btn-small" type="submit">Speichern</button>
     </form>
   </section>
@@ -83,8 +70,8 @@
     
   
 
-    <form method="post" action="../../app/konto/passwort/" class="stack">
-      <input type="hidden" name="_csrf" value="Rg5oMJgYyNAEvN7DMjPdQAlyile-F8a2wow48_Ef9LM">
+    <form method="post" action="../../app/" class="stack">
+      <input type="hidden" name="_csrf" value="_d3KIwMa4VY_BwO8-D20zHqz56RvMqAhwdMNpC79bWg">
       <label>Aktuelles Passwort<input type="password" name="current" required autocomplete="current-password" maxlength="200"></label>
       <label>Neues Passwort<input type="password" name="password" required minlength="10" maxlength="200" autocomplete="new-password"></label>
       <label>Neues Passwort wiederholen<input type="password" name="password2" required minlength="10" maxlength="200" autocomplete="new-password"></label>
@@ -98,13 +85,14 @@
   
   
     <p>Schütze dein Konto zusätzlich mit einem Code vom Handy.</p>
-    <form method="post" action="../../app/konto/2fa/start/"><input type="hidden" name="_csrf" value="Rg5oMJgYyNAEvN7DMjPdQAlyile-F8a2wow48_Ef9LM"><button class="btn btn-small" type="submit">Zwei-Faktor-Anmeldung einrichten</button></form>
+    <form method="post" action="../../app/"><input type="hidden" name="_csrf" value="_d3KIwMa4VY_BwO8-D20zHqz56RvMqAhwdMNpC79bWg"><button class="btn btn-small" type="submit">Zwei-Faktor-Anmeldung einrichten</button></form>
   
 
   <h3 class="h4">Angemeldete Geräte</h3>
+  <p class="small muted">Dein Konto kann auf höchstens 3 Geräten gleichzeitig angemeldet sein. Meldest du dich auf einem weiteren an, wird das älteste abgemeldet. Bei einem neuen Gerät bekommst du eine E-Mail.</p>
   <ul class="sessions">
     
-    <li><span>Unbekanntes Gerät</span> <span class="small muted">zuletzt 31.10.2026, 01:47 · dieses Gerät</span></li>
+    <li><span>Unbekanntes Gerät</span> <span class="small muted">zuletzt 31.10.2026, 02:06 · dieses Gerät</span></li>
     
   </ul>
   
@@ -113,13 +101,13 @@
 <section class="panel cut">
   <h2 class="h3">Deine Daten</h2>
   <p>Du kannst alle Daten, die wir über dich gespeichert haben, als Datei herunterladen.</p>
-  <p><a class="btn btn-ghost btn-small" href="../../vorschau/">Meine Daten herunterladen</a></p>
+  <p><a class="btn btn-ghost btn-small" href="../../app/">Meine Daten herunterladen</a></p>
   <details class="danger">
     <summary>Konto löschen</summary>
     
     <p>Dein Abo wird sofort beendet, alle Lerndaten werden gelöscht. Das lässt sich nicht rückgängig machen.</p>
-    <form method="post" action="../../app/konto/loeschen/" class="stack">
-      <input type="hidden" name="_csrf" value="Rg5oMJgYyNAEvN7DMjPdQAlyile-F8a2wow48_Ef9LM">
+    <form method="post" action="../../app/" class="stack">
+      <input type="hidden" name="_csrf" value="_d3KIwMa4VY_BwO8-D20zHqz56RvMqAhwdMNpC79bWg">
       <label>Passwort<input type="password" name="password" required autocomplete="current-password" maxlength="200"></label>
       <label>Tippe LÖSCHEN zur Bestätigung<input name="confirm" required maxlength="20" autocomplete="off"></label>
       <button class="btn btn-danger btn-small" type="submit">Konto endgültig löschen</button>

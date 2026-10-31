@@ -12,6 +12,9 @@ function nowIso() {
 function migrate(db) {
   const columns = db.prepare('PRAGMA table_info(subscriptions)').all().map((c) => c.name);
   if (!columns.includes('telegram_addon')) db.exec('ALTER TABLE subscriptions ADD COLUMN telegram_addon INTEGER NOT NULL DEFAULT 0');
+  const seminarColumns = db.prepare('PRAGMA table_info(seminars)').all().map((c) => c.name);
+  if (!seminarColumns.includes('vimeo_id')) db.exec('ALTER TABLE seminars ADD COLUMN vimeo_id TEXT');
+  if (!seminarColumns.includes('vimeo_hash')) db.exec('ALTER TABLE seminars ADD COLUMN vimeo_hash TEXT');
 }
 
 /**

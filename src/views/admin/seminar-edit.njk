@@ -19,6 +19,7 @@
     <label>Block<input name="block_title" value="{{ seminar.block_title }}" maxlength="60"></label>
     <label>Videolänge in Sekunden<input type="number" name="video_duration" value="{{ seminar.video_duration or '' }}" min="0" max="21600"><span class="small muted">Wird beim Upload automatisch erkannt, wenn möglich.</span></label>
   </div>
+  <label>Vimeo-Link <span class="small muted">(optional, statt Upload)</span><input name="vimeo" value="{{ seminar.vimeo_text }}" maxlength="300" placeholder="https://vimeo.com/123456789"><span class="small muted">In Vimeo bei Datenschutz „Auf Vimeo verbergen“ und „Nur auf bestimmten Domains einbetten“ (deine Domain) einstellen, sonst kann das Video außerhalb der Schule angesehen werden. Die Länge wird automatisch geholt, wenn Vimeo sie freigibt, sonst oben eintragen.</span></label>
   <label>Titel<input name="title" value="{{ seminar.title }}" required maxlength="120"></label>
   <label>Kurzbeschreibung<textarea name="summary" rows="2" maxlength="500">{{ seminar.summary }}</textarea></label>
   <div class="form-grid">
@@ -36,7 +37,7 @@
 <form method="post" action="/admin/seminare/{{ seminar.id }}/video" enctype="multipart/form-data" class="panel cut stack">
   {{ csrf() }}
   <h2 class="h3">Video</h2>
-  <p>{% if seminar.video_file %}Aktuelles Video: {{ seminar.video_duration | duration }} Min. Ein neuer Upload ersetzt es.{% else %}Noch kein Video hinterlegt.{% endif %}</p>
+  <p>{% if seminar.vimeo_id %}Dieses Seminar nutzt das Vimeo-Video ({{ seminar.video_duration | duration }} Min.). Ein Upload wird erst verwendet, wenn der Vimeo-Link leer ist.{% elif seminar.video_file %}Aktuelles Video: {{ seminar.video_duration | duration }} Min. Ein neuer Upload ersetzt es.{% else %}Noch kein Video hinterlegt.{% endif %}</p>
   <label>Datei (MP4 oder WebM)<input type="file" name="video" accept="video/mp4,video/webm" required></label>
   <button class="btn btn-small" type="submit">Hochladen</button>
 </form>

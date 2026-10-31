@@ -131,15 +131,29 @@ module.exports = function authRoutes(ctx) {
     }
     sessions.create(res, user.id, { userAgent: req.get('user-agent') });
     db.audit(user.id, 'login.ok');
+    await warnNewDevice(req, res, user.id);
     res.redirect(303, next);
   });
+
+  /** Warn-Mail, wenn sich das Konto von einem bisher unbekannten Gerät anmeldet. */
+  async function warnNewDevice(req, res, userId) {
+    if (!sessions.rememberDevice(req, res, userId)) return;
+    const u = db.get('SELECT email, first_name FROM users WHERE id = ?', userId);
+    const when = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'long', timeStyle: 'short' }).format(new Date());
+    db.audit(userId, 'login.new_device', String(req.get('user-agent') || '').slice(0, 120));
+    await mailer.send({
+      to: u.email,
+      subject: 'Neue Anmeldung in deinem Konto',
+      text: `Hallo ${u.first_name},\n\nam ${when} Uhr hat sich jemand von einem neuen Gerät in dein Konto eingeloggt.\n\nGerät: ${v.str(req.get('user-agent'), 160) || 'unbekannt'}\nIP-Adresse: ${req.ip}\n\nWarst du das? Dann ist alles in Ordnung.\n\nWarst du das nicht? Ändere sofort dein Passwort unter ${cfg.appUrl}/app/konto. Dabei werden alle anderen Geräte abgemeldet. Noch sicherer ist die Zwei-Faktor-Anmeldung, die du dort einschalten kannst.`,
+    });
+  }
 
   router.get('/login/2fa', (req, res) => {
     if (!req.mfaPending) return res.redirect(303, '/login');
     res.render('auth/2fa.njk', { title: 'Bestätigungscode', next: v.safeNext(req.query.next) });
   });
 
-  router.post('/login/2fa', limit('2fa-ip', 20, 15 * 60_000), (req, res) => {
+  router.post('/login/2fa', limit('2fa-ip', 20, 15 * 60_000), async (req, res) => {
     if (!req.mfaPending) return res.redirect(303, '/login');
     const next = v.safeNext(req.body.next);
     const userId = req.pendingUserId;
@@ -159,6 +173,7 @@ module.exports = function authRoutes(ctx) {
     sessions.destroy(req, res);
     sessions.create(res, user.id, { userAgent: req.get('user-agent') });
     db.audit(user.id, 'login.ok', '2fa');
+    await warnNewDevice(req, res, user.id);
     res.redirect(303, next);
   });
 

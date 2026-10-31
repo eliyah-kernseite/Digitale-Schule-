@@ -28,6 +28,15 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
 
+-- Bekannte Geräte: Anmeldung von einem neuen Gerät löst eine Warn-Mail aus.
+CREATE TABLE IF NOT EXISTS known_devices (
+  id_hash      TEXT PRIMARY KEY,
+  user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at   TEXT NOT NULL,
+  last_used_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS known_devices_user ON known_devices(user_id);
+
 CREATE TABLE IF NOT EXISTS tokens (
   id_hash    TEXT PRIMARY KEY,
   kind       TEXT NOT NULL,
@@ -76,6 +85,8 @@ CREATE TABLE IF NOT EXISTS seminars (
   video_file     TEXT,
   video_mime     TEXT,
   video_duration INTEGER NOT NULL DEFAULT 0,
+  vimeo_id       TEXT,
+  vimeo_hash     TEXT,
   chapters       TEXT NOT NULL DEFAULT '[]',
   task_type      TEXT NOT NULL DEFAULT 'text' CHECK (task_type IN ('text', 'check')),
   task_prompt    TEXT NOT NULL DEFAULT '',

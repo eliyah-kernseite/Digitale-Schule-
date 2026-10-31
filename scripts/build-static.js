@@ -25,23 +25,30 @@ function fileFor(route) {
   return route === '/' ? 'index.html' : path.join(route.slice(1), 'index.html');
 }
 
-/** Macht absolute Pfade relativ, damit die Seiten in jedem Pages-Unterordner laufen. */
-function relativize(html, route, exported) {
-  const pre = prefixFor(route);
+/**
+ * Macht absolute Pfade relativ, damit die Seiten in jedem Pages-Unterordner laufen.
+ * Zwei Demo-Personen: der frisch Registrierte sieht unter app/ die Paywall (wie im echten
+ * System), das zahlende Mitglied liegt unter demo/app/.
+ */
+function relativize(html, out, persona, exported) {
+  const pre = prefixFor(out);
   return html.replace(/(href|src|action)="\/(?!\/)([^"]*)"/g, (all, attr, rest) => {
     const [pathPart, hash = ''] = rest.split('#');
     const clean = pathPart.split('?')[0];
     const h = hash ? `#${hash}` : '';
     if (/\.[a-z0-9]{2,5}$/i.test(clean)) return `${attr}="${pre}${clean}"`; // Datei
-    const target = `/${clean}`.replace(/\/$/, '') || '/';
+    let target = `/${clean}`.replace(/\/$/, '') || '/';
+    if (persona === 'member' && target.startsWith('/app')) target = `/demo${target}`;
+    // Ohne Abo führt im echten System jede Mitgliederseite zur Paywall zurück.
+    if (persona === 'free' && target.startsWith('/app') && !exported.has(target)) target = '/app';
     if (attr === 'href' && !exported.has(target)) return `${attr}="${pre}vorschau/${h}"`;
-    return `${attr}="${pre}${clean ? `${clean}/` : ''}${h}"`;
+    return `${attr}="${pre}${target === '/' ? '' : `${target.slice(1)}/`}${h}"`;
   });
 }
 
 function injectPreview(html, route) {
   const pre = prefixFor(route);
-  const banner = '<div class="preview-banner">Vorschau ohne Server: Registrieren und Login führen direkt in die Demo. Zahlung und Videos laufen erst auf dem echten Server.</div>';
+  const banner = '<div class="preview-banner">Vorschau ohne Server: Registrieren zeigt, was ein neues Konto sieht (Paywall). Login öffnet ein Demo-Mitglied mit Abo. Zahlung und Videos laufen erst auf dem echten Server.</div>';
   return html
     .replace(/<body([^>]*)>/, `<body$1>${banner}`)
     .replace('</body>', `<script src="${pre}js/static-preview.js"></script></body>`);
@@ -95,27 +102,31 @@ function injectPreview(html, route) {
   const publicRoutes = ['/', '/faecher', ...subjects, '/so-funktionierts', '/lehrplan', '/community', '/beitraege', ...posts,
     '/kuendigen', '/impressum', '/datenschutz', '/agb', '/widerruf', '/login', '/registrieren', '/passwort-vergessen'];
   const memberRoutes = ['/app', '/app/lehrgaenge', ...live, `/app/seminare/${seminars[4].id}`, `/app/seminare/${seminars[0].id}`, '/app/zeugnis', '/app/community', '/app/konto'];
-  const freeRoutes = ['/app/freischalten'];
-  const exported = new Set([...publicRoutes, ...memberRoutes, ...freeRoutes, '/vorschau']);
+  const freeRoutes = ['/app', '/app/konto'];
+  const pages = [
+    ...publicRoutes.map((route) => ({ route, out: route, persona: 'public' })),
+    ...freeRoutes.map((route) => ({ route, out: route, persona: 'free' })),
+    ...memberRoutes.map((route) => ({ route, out: `/demo${route}`, persona: 'member' })),
+  ];
+  const exported = new Set([...pages.map((p) => p.out), '/vorschau']);
 
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
 
-  for (const route of [...publicRoutes, ...memberRoutes, ...freeRoutes]) {
-    const isMember = route.startsWith('/app');
-    const cookie = freeRoutes.includes(route) ? freeToken : token;
-    const res = await fetch(base + route, { headers: isMember ? { cookie } : {}, redirect: 'manual' });
+  for (const { route, out, persona } of pages) {
+    const cookie = persona === 'free' ? freeToken : persona === 'member' ? token : null;
+    const res = await fetch(base + route, { headers: cookie ? { cookie } : {}, redirect: 'manual' });
     if (res.status !== 200) throw new Error(`${route}: HTTP ${res.status}`);
     let html = await res.text();
-    if (isMember) html = html.replace(/<html lang="de">/, '<html lang="de" data-demo="1">');
-    html = injectPreview(relativize(html, route, exported), route);
-    const file = path.join(OUT, fileFor(route));
+    if (cookie) html = html.replace(/<html lang="de">/, '<html lang="de" data-demo="1">');
+    html = injectPreview(relativize(html, out, persona, exported), out);
+    const file = path.join(OUT, fileFor(out));
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, html);
   }
 
   // Hinweisseite für Ziele, die nur mit Server funktionieren
-  const note = `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Vorschau · ${cfg.schoolName}</title><link rel="stylesheet" href="../css/main.css"></head><body><main class="section"><div class="wrap narrow"><p class="eyebrow">Vorschau</p><h1 class="h1">Das geht nur mit Server.</h1><p class="lead">Diese Seite ist eine statische Vorschau auf GitHub Pages. Login, Zahlung, Formulare, Videos und der Adminbereich laufen erst, wenn die App auf einem echten Server gestartet ist (siehe README).</p><p><a class="btn" href="../">Zur Startseite</a> <a class="btn btn-ghost" href="../app/">Demo-Mitgliederbereich</a></p></div></main></body></html>`;
+  const note = `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Vorschau · ${cfg.schoolName}</title><link rel="stylesheet" href="../css/main.css"></head><body><main class="section"><div class="wrap narrow"><p class="eyebrow">Vorschau</p><h1 class="h1">Das geht nur mit Server.</h1><p class="lead">Diese Seite ist eine statische Vorschau auf GitHub Pages. Login, Zahlung, Formulare, Videos und der Adminbereich laufen erst, wenn die App auf einem echten Server gestartet ist (siehe README).</p><p><a class="btn" href="../">Zur Startseite</a> <a class="btn btn-ghost" href="../demo/app/">Demo-Mitgliederbereich</a></p></div></main></body></html>`;
   fs.mkdirSync(path.join(OUT, 'vorschau'), { recursive: true });
   fs.writeFileSync(path.join(OUT, 'vorschau', 'index.html'), note);
 
@@ -132,8 +143,8 @@ function injectPreview(html, route) {
     e.preventDefault();
     var action = e.target.getAttribute('action') || '';
     var root = document.querySelector('link[rel=stylesheet]').getAttribute('href').split('css/main.css')[0];
-    if (action.slice(-13) === 'registrieren/') { window.location.href = root + 'app/freischalten/'; return; }
-    if (action.slice(-6) === 'login/') { window.location.href = root + 'app/'; return; }
+    if (action.slice(-13) === 'registrieren/') { window.location.href = root + 'app/'; return; }
+    if (action.slice(-6) === 'login/') { window.location.href = root + 'demo/app/'; return; }
     window.alert('Das ist nur die Vorschau. Formulare und Zahlung funktionieren erst auf dem echten Server.');
   }, true);
   document.querySelectorAll('video').forEach(function (v) { v.removeAttribute('src'); });

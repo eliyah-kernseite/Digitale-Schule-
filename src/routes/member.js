@@ -110,6 +110,11 @@ module.exports = function memberRoutes(ctx) {
     const progress = db.get('SELECT watched_seconds, video_done_at FROM seminar_progress WHERE user_id = ? AND seminar_id = ?', req.user.id, seminar.id);
     const submission = db.get('SELECT * FROM submissions WHERE user_id = ? AND seminar_id = ?', req.user.id, seminar.id);
     const myReview = db.get('SELECT * FROM reviews WHERE user_id = ? AND seminar_id = ?', req.user.id, seminar.id);
+    // Nur auf Seminarseiten mit Vimeo darf der Vimeo-Player eingebettet werden.
+    if (seminar.vimeo_id) {
+      const csp = String(res.getHeader('Content-Security-Policy') || '');
+      res.setHeader('Content-Security-Policy', `${csp}; frame-src https://player.vimeo.com`);
+    }
     res.render('member/seminar.njk', {
       title: `Seminar ${seminar.number} · ${seminar.title}`,
       seminar,
@@ -431,6 +436,7 @@ module.exports = function memberRoutes(ctx) {
       ziel: db.get('SELECT text, updated_at FROM goals WHERE user_id = ?', uid) || null,
       routine: db.all('SELECT day FROM routine_checkins WHERE user_id = ? ORDER BY day', uid).map((r) => r.day),
       bewertungen: db.all('SELECT seminar_id, rating, comment, status, created_at FROM reviews WHERE user_id = ?', uid),
+      geraete: db.all('SELECT user_agent, created_at, last_seen_at FROM sessions WHERE user_id = ? AND mfa_pending = 0', uid),
     };
     res.set('Content-Disposition', 'attachment; filename="meine-daten.json"');
     res.type('application/json').send(JSON.stringify(data, null, 2));

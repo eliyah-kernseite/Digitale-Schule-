@@ -32,6 +32,7 @@ const NOTICES = {
   'zahlung-abgebrochen': ['warn', 'Die Zahlung wurde abgebrochen. Es wurde nichts berechnet.'],
   'video-hochgeladen': ['ok', 'Video hochgeladen.'],
   'video-fehler': ['warn', 'Das Video konnte nicht verarbeitet werden. Erlaubt sind MP4 und WebM.'],
+  'vimeo-ungueltig': ['warn', 'Der Vimeo-Link ist ungültig. Beispiel: https://vimeo.com/123456789 (bei privaten Links mit dem Teil danach).'],
   'veroeffentlichen-video': ['warn', 'Ein Seminar kann erst veröffentlicht werden, wenn ein Video mit Länge hinterlegt ist.'],
 };
 

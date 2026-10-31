@@ -7,6 +7,10 @@ const ABSOLUTE_MS = 30 * 24 * 3600 * 1000; // spätestens nach 30 Tagen neu anme
 const MFA_MS = 10 * 60 * 1000; // 10 Minuten für die Eingabe des 2FA-Codes
 const TOUCH_MS = 5 * 60 * 1000;
 
+function deviceCookieName(cfg) {
+  return cfg.secureCookies ? '__Host-ds_dev' : 'ds_dev';
+}
+
 function cookieName(cfg) {
   return cfg.secureCookies ? '__Host-ds_sid' : 'ds_sid';
 }
@@ -27,6 +31,14 @@ function createSessionStore(db, cfg) {
       new Date(now + ttl).toISOString(), String(userAgent).slice(0, 200),
     );
     res.cookie(cookieName(cfg), token, cookieOptions(cfg, ttl));
+    if (!mfaPending) {
+      // Höchstens cfg.maxDevices gleichzeitige Anmeldungen: die ältesten werden beendet.
+      db.run(
+        `DELETE FROM sessions WHERE user_id = ? AND mfa_pending = 0 AND id_hash NOT IN (
+           SELECT id_hash FROM sessions WHERE user_id = ? AND mfa_pending = 0 ORDER BY created_at DESC, rowid DESC LIMIT ?)`,
+        userId, userId, cfg.maxDevices || 3,
+      );
+    }
     return token;
   }
 
@@ -84,11 +96,32 @@ function createSessionStore(db, cfg) {
     return next();
   }
 
+  /**
+   * Merkt sich das Gerät über ein eigenes, langlebiges Cookie (nur der Hash liegt in der DB).
+   * Gibt true zurück, wenn sich das Konto von einem neuen Gerät anmeldet, obwohl es schon bekannte gibt.
+   */
+  function rememberDevice(req, res, userId) {
+    const now = new Date().toISOString();
+    const existing = req.cookies[deviceCookieName(cfg)];
+    if (existing && existing.length <= 100) {
+      const row = db.get('SELECT user_id FROM known_devices WHERE id_hash = ?', sha256(existing));
+      if (row && row.user_id === userId) {
+        db.run('UPDATE known_devices SET last_used_at = ? WHERE id_hash = ?', now, sha256(existing));
+        return false;
+      }
+    }
+    const hadDevices = db.get('SELECT COUNT(*) AS n FROM known_devices WHERE user_id = ?', userId).n > 0;
+    const token = randomToken(32);
+    db.run('INSERT INTO known_devices (id_hash, user_id, created_at, last_used_at) VALUES (?, ?, ?, ?)', sha256(token), userId, now, now);
+    res.cookie(deviceCookieName(cfg), token, cookieOptions(cfg, 400 * 24 * 3600 * 1000));
+    return hadDevices;
+  }
+
   function sweep() {
     db.run('DELETE FROM sessions WHERE expires_at <= ?', new Date().toISOString());
   }
 
-  return { create, destroy, destroyAllForUser, middleware, sweep };
+  return { create, destroy, destroyAllForUser, middleware, sweep, rememberDevice };
 }
 
 module.exports = { createSessionStore };
