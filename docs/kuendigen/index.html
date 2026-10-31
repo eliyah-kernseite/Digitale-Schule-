@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verträge hier kündigen · Fundament</title>
+  <meta name="description" content="Die digitale Schule für Männer. Persönlichkeit, Geld und Fitness. Echter Unterricht, messbarer Fortschritt.">
+  <meta name="theme-color" content="#16130f">
+  <link rel="preload" href="../fonts/fundament-display.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="icon" href="../img/icon.svg" type="image/svg+xml">
+  
+</head>
+<body class=""><div class="preview-banner">Vorschau ohne Server: Login, Zahlung, Formulare und Videos funktionieren erst auf dem echten Server.</div>
+  <a class="skip" href="#inhalt">Zum Inhalt springen</a>
+  
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="logo" href="../" aria-label="Fundament Startseite"><svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M0 9 9 0h31v40H0z" fill="currentColor"/><path d="M13 9h16v6H19v4h8v6h-8v8h-6z" fill="var(--logo-cut, #16130f)"/></svg><span class="logo-word">Fundament</span>
+</a>
+      <button class="nav-btn" type="button" aria-expanded="false" aria-controls="hauptmenue" aria-label="Menü"><span></span><span></span><span></span></button>
+        <nav class="site-nav" id="hauptmenue" aria-label="Hauptmenü">
+          <a href="../faecher/" >Fächer</a>
+          <a href="../so-funktionierts/" >So funktioniert’s</a>
+          <a href="../lehrplan/" >Lehrplan</a>
+          <a href="../community/" >Community</a>
+          <a href="../beitraege/" >Beiträge</a>
+          
+            <a class="nav-login" href="../login/">Login</a>
+            <a class="btn btn-small" href="../mitgliedschaft/">Mitglied werden</a>
+          
+        </nav>
+    </div>
+  </header>
+  
+
+  
+
+  <main id="inhalt">
+    
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Kündigung</p>
+    <h1 class="h1">Verträge hier kündigen</h1>
+    <p class="lead">Du kannst deine Mitgliedschaft hier ohne Login kündigen. Du erhältst sofort eine Eingangsbestätigung per E-Mail.</p>
+    
+  
+
+    <form method="post" action="../kuendigen/" class="panel cut stack">
+      <input type="hidden" name="_csrf" value="unOWpLNCpLE3-2mMCkA4g_-hBmP2NYWF2NiNslsrm44">
+      <label>Vor- und Nachname<input name="name" value="" required maxlength="120" autocomplete="name"></label>
+      <label>E-Mail-Adresse deines Kontos<input type="email" name="email" value="" required maxlength="254" autocomplete="email"></label>
+      <fieldset class="radio-row">
+        <legend>Art der Kündigung</legend>
+        <label class="check"><input type="radio" name="kind" value="ordentlich" checked> <span>Ordentliche Kündigung</span></label>
+        <label class="check"><input type="radio" name="kind" value="ausserordentlich" > <span>Außerordentliche Kündigung</span></label>
+      </fieldset>
+      <label>Gewünschter Zeitpunkt <span class="muted small">(leer lassen für nächstmöglichen)</span><input type="date" name="wished_date" value=""></label>
+      <label>Grund <span class="muted small">(nur bei außerordentlicher Kündigung nötig)</span><textarea name="reason" rows="3" maxlength="2000"></textarea></label>
+      <button class="btn btn-block" type="submit">Jetzt kündigen</button>
+    </form>
+  </div>
+</section>
+
+  </main>
+
+  
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div>
+        <a class="logo logo-footer" href="../"><svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M0 9 9 0h31v40H0z" fill="currentColor"/><path d="M13 9h16v6H19v4h8v6h-8v8h-6z" fill="var(--logo-cut, #16130f)"/></svg><span class="logo-word">Fundament</span>
+</a>
+        <p class="muted small">Die digitale Schule für Männer. Fortschritt statt Versprechen.</p>
+      </div>
+      <nav aria-label="Rechtliches" class="footer-links">
+        <a href="../impressum/">Impressum</a>
+        <a href="../datenschutz/">Datenschutz</a>
+        <a href="../agb/">AGB</a>
+        <a href="../widerruf/">Widerruf</a>
+        <a class="footer-cancel" href="../kuendigen/">Verträge hier kündigen</a>
+      </nav>
+    </div>
+    <div class="wrap small muted footer-note">Nur technisch notwendige Cookies. Kein Tracking, keine Werbung.</div>
+  </footer>
+  
+  <script src="../js/site.js" defer></script>
+  
+<script src="../js/static-preview.js"></script></body>
+</html>
