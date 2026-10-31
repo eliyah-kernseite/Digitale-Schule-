@@ -85,3 +85,24 @@ test('Admin: Fach live schalten, Mitglied verwalten, Beitrag, Protokoll, CSV', a
   assert.match(csv.text, /"'=cmd@x.de"/);
   assert.match((await c.get('/admin/protokoll')).text, /admin.member.comp/);
 });
+
+test('Admin: Vimeo-Video statt Upload, nur gültige Links, Einbettung nur auf der Seminarseite erlaubt', async (t) => {
+  const app = await startApp();
+  t.after(() => app.stop());
+  const c = await admin(app);
+  const s = app.db.get("SELECT s.* FROM seminars s JOIN subjects j ON j.id = s.subject_id WHERE j.slug = 'persoenlichkeit' AND s.position = 1");
+  await c.get(`/admin/seminare/${s.id}`);
+  const base = { position: '1', block_title: s.block_title, title: s.title, task_type: s.task_type, task_prompt: s.task_prompt };
+  let res = await c.post(`/admin/seminare/${s.id}`, { ...base, vimeo: 'https://evil.example/123', published: 'on' });
+  assert.match(res.location, /vimeo-ungueltig/);
+  res = await c.post(`/admin/seminare/${s.id}`, { ...base, vimeo: 'https://vimeo.com/76979871/8272103f6e', video_duration: '600', published: 'on' });
+  assert.match(res.location, /gespeichert/);
+  const row = app.db.get('SELECT vimeo_id, vimeo_hash, published FROM seminars WHERE id = ?', s.id);
+  assert.deepEqual({ ...row }, { vimeo_id: '76979871', vimeo_hash: '8272103f6e', published: 1 });
+
+  const page = await c.get(`/app/seminare/${s.id}`);
+  assert.match(page.text, /src="https:\/\/player\.vimeo\.com\/video\/76979871\?h=8272103f6e&amp;controls=0/);
+  assert.match(page.text, /vimeo-player\.min\.js/);
+  assert.match(page.headers.get('content-security-policy'), /frame-src https:\/\/player\.vimeo\.com/);
+  assert.doesNotMatch((await c.get('/app')).headers.get('content-security-policy'), /frame-src/);
+});

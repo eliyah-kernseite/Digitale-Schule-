@@ -49,4 +49,25 @@ function safeNext(value, fallback = '/app') {
   return v;
 }
 
-module.exports = { str, email, intIn, id, slug, slugify, checkbox, safeNext };
+/**
+ * Liest einen Vimeo-Link (vimeo.com/123, vimeo.com/123/abc, player.vimeo.com/video/123?h=abc)
+ * und gibt nur Video-ID und Freigabe-Hash zurück. Alles andere wird abgelehnt.
+ */
+function vimeo(value) {
+  const v = str(value, 300);
+  if (!v) return null;
+  let url;
+  try {
+    url = new URL(/^\d+$/.test(v) ? `https://vimeo.com/${v}` : v);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' || !/^(www\.|player\.)?vimeo\.com$/.test(url.hostname)) return null;
+  const m = /^\/(?:video\/)?(\d{1,12})(?:\/([a-f0-9]{6,20}))?\/?$/.exec(url.pathname);
+  if (!m) return null;
+  const hash = m[2] || url.searchParams.get('h') || null;
+  if (hash && !/^[a-f0-9]{6,20}$/.test(hash)) return null;
+  return { id: m[1], hash };
+}
+
+module.exports = { str, email, intIn, id, slug, slugify, checkbox, safeNext, vimeo };

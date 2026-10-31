@@ -58,6 +58,7 @@ function createApp(cfg, { logger = console, db: injectedDb } = {}) {
   env.addGlobal('priceNote', cfg.priceNote);
   env.addGlobal('paymentMock', payments.isMock);
   env.addGlobal('telegramPriceLabel', cfg.telegramPriceLabel);
+  env.addGlobal('maxDevices', cfg.maxDevices);
   // Den Zusatz nur anbieten, wenn er auch funktioniert (oder im Testmodus).
   ctx.telegramAddon = payments.telegramAddonPossible && (telegram.enabled || payments.isMock);
   env.addGlobal('telegramAddon', ctx.telegramAddon);

@@ -96,6 +96,7 @@
   {% endif %}
 
   <h3 class="h4">Angemeldete Geräte</h3>
+  <p class="small muted">Dein Konto kann auf höchstens {{ maxDevices }} Geräten gleichzeitig angemeldet sein. Meldest du dich auf einem weiteren an, wird das älteste abgemeldet. Bei einem neuen Gerät bekommst du eine E-Mail.</p>
   <ul class="sessions">
     {% for s in sessionsList %}
     <li><span>{{ s.user_agent | truncate(70) or 'Unbekanntes Gerät' }}</span> <span class="small muted">zuletzt {{ s.last_seen_at | date(true) }}{% if s.current %} · dieses Gerät{% endif %}</span></li>

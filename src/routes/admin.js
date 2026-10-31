@@ -152,29 +152,51 @@ module.exports = function adminRoutes(ctx) {
       task_prompt: v.str(body.task_prompt, 1000),
       chapters: JSON.stringify(parseChapters(body.chapters)),
       video_duration: v.intIn(body.video_duration, 0, 6 * 3600) ?? 0,
+      vimeo: v.vimeo(body.vimeo),
+      vimeoRaw: v.str(body.vimeo, 300),
       published: v.checkbox(body.published),
     };
   }
 
-  router.post('/seminare', (req, res) => {
+  /** Holt die Länge eines Vimeo-Videos über oEmbed (klappt bei Videos, die eingebettet werden dürfen). */
+  async function vimeoDuration(vimeo) {
+    if (!vimeo || cfg.isTest) return 0;
+    try {
+      const target = `https://vimeo.com/${vimeo.id}${vimeo.hash ? `/${vimeo.hash}` : ''}`;
+      const res = await fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(target)}`, {
+        headers: { Referer: cfg.appUrl }, signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return 0;
+      const data = await res.json();
+      return v.intIn(Math.round(Number(data.duration)), 1, 6 * 3600) || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  router.post('/seminare', async (req, res) => {
     const f = readSeminarForm(req.body);
     const subject = f.subject_id && db.get('SELECT id FROM subjects WHERE id = ?', f.subject_id);
-    if (!subject || !f.position || f.title.length < 2 || f.task_prompt.length < 5) {
+    const errors = [];
+    if (!subject || !f.position || f.title.length < 2 || f.task_prompt.length < 5) errors.push('Bitte Fach, Position, Titel und Aufgabe ausfüllen.');
+    if (f.vimeoRaw && !f.vimeo) errors.push('Der Vimeo-Link ist ungültig. Beispiel: https://vimeo.com/123456789');
+    if (errors.length) {
       return res.status(422).render('admin/seminar-edit.njk', {
-        title: 'Neues Seminar', subjects: learning.subjects(), seminar: { ...f, chapters_text: chaptersToText(f.chapters) },
-        errors: ['Bitte Fach, Position, Titel und Aufgabe ausfüllen.'],
+        title: 'Neues Seminar', subjects: learning.subjects(), seminar: { ...f, vimeo_text: f.vimeoRaw, chapters_text: chaptersToText(f.chapters) }, errors,
       });
     }
+    if (f.vimeo && !f.video_duration) f.video_duration = await vimeoDuration(f.vimeo);
     try {
-      const info = db.run(`INSERT INTO seminars (subject_id, position, block_title, title, summary, task_type, task_prompt, chapters, video_duration, published)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)`,
-      f.subject_id, f.position, f.block_title, f.title, f.summary, f.task_type, f.task_prompt, f.chapters, f.video_duration);
+      const info = db.run(`INSERT INTO seminars (subject_id, position, block_title, title, summary, task_type, task_prompt, chapters, video_duration, vimeo_id, vimeo_hash, published)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)`,
+      f.subject_id, f.position, f.block_title, f.title, f.summary, f.task_type, f.task_prompt, f.chapters, f.video_duration,
+      f.vimeo ? f.vimeo.id : null, f.vimeo ? f.vimeo.hash : null);
       db.audit(req.user.id, 'admin.seminar.create', `id=${info.lastInsertRowid}`);
       res.redirect(303, `/admin/seminare/${info.lastInsertRowid}?hinweis=gespeichert`);
     } catch (err) {
       if (!String(err.message).includes('UNIQUE')) throw err;
       res.status(422).render('admin/seminar-edit.njk', {
-        title: 'Neues Seminar', subjects: learning.subjects(), seminar: { ...f, chapters_text: chaptersToText(f.chapters) },
+        title: 'Neues Seminar', subjects: learning.subjects(), seminar: { ...f, vimeo_text: f.vimeoRaw, chapters_text: chaptersToText(f.chapters) },
         errors: ['Diese Position ist in dem Fach schon vergeben.'],
       });
     }
@@ -187,27 +209,32 @@ module.exports = function adminRoutes(ctx) {
     const submissions = db.get('SELECT COUNT(*) AS n FROM submissions WHERE seminar_id = ?', id).n;
     const rating = db.get("SELECT COUNT(*) AS n, ROUND(AVG(rating), 1) AS avg FROM reviews WHERE seminar_id = ? AND status != 'hidden'", id);
     res.render('admin/seminar-edit.njk', {
-      title: seminar.title, subjects: learning.subjects(), seminar: { ...seminar, chapters_text: chaptersToText(seminar.chapters) }, submissions, rating,
+      title: seminar.title, subjects: learning.subjects(), submissions, rating,
+      seminar: { ...seminar, chapters_text: chaptersToText(seminar.chapters), vimeo_text: seminar.vimeo_id ? `https://vimeo.com/${seminar.vimeo_id}${seminar.vimeo_hash ? `/${seminar.vimeo_hash}` : ''}` : '' },
     });
   });
 
-  router.post('/seminare/:id', (req, res, next) => {
+  router.post('/seminare/:id', async (req, res, next) => {
     const id = v.id(req.params.id);
     const existing = id && db.get('SELECT * FROM seminars WHERE id = ?', id);
     if (!existing) return next('route');
     const f = readSeminarForm(req.body);
     if (!f.position || f.title.length < 2 || f.task_prompt.length < 5) return res.redirect(303, `/admin/seminare/${id}`);
-    const duration = f.video_duration || existing.video_duration;
+    if (f.vimeoRaw && !f.vimeo) return res.redirect(303, `/admin/seminare/${id}?hinweis=vimeo-ungueltig`);
+    const vimeoChanged = (f.vimeo ? f.vimeo.id : null) !== existing.vimeo_id;
+    let duration = f.video_duration || (vimeoChanged ? 0 : existing.video_duration);
+    if (f.vimeo && !duration) duration = await vimeoDuration(f.vimeo);
     let published = f.published;
     let notice = 'gespeichert';
-    if (published && (!existing.video_file || !duration)) {
+    if (published && ((!existing.video_file && !f.vimeo) || !duration)) {
       published = false;
       notice = 'veroeffentlichen-video';
     }
     try {
       db.run(`UPDATE seminars SET position = ?, block_title = ?, title = ?, summary = ?, task_type = ?, task_prompt = ?, chapters = ?,
-              video_duration = ?, published = ? WHERE id = ?`,
-      f.position, f.block_title, f.title, f.summary, f.task_type, f.task_prompt, f.chapters, duration, published ? 1 : 0, id);
+              video_duration = ?, vimeo_id = ?, vimeo_hash = ?, published = ? WHERE id = ?`,
+      f.position, f.block_title, f.title, f.summary, f.task_type, f.task_prompt, f.chapters, duration,
+      f.vimeo ? f.vimeo.id : null, f.vimeo ? f.vimeo.hash : null, published ? 1 : 0, id);
     } catch (err) {
       if (!String(err.message).includes('UNIQUE')) throw err;
       notice = 'abo-fehler';

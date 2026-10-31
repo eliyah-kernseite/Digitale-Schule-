@@ -18,14 +18,18 @@
 
 <div class="seminar-grid">
   <section class="player-wrap">
-    {% if seminar.video_file %}
+    {% if seminar.vimeo_id or seminar.video_file %}
     <div class="player" data-player
          data-id="{{ seminar.id }}"
          data-duration="{{ seminar.video_duration }}"
          data-watched="{{ watched }}"
          data-done="{{ 'true' if videoDone else 'false' }}"
          data-csrf="{{ csrfToken }}">
+      {% if seminar.vimeo_id %}
+      <div class="player-vimeo"><iframe data-vimeo src="https://player.vimeo.com/video/{{ seminar.vimeo_id }}?{% if seminar.vimeo_hash %}h={{ seminar.vimeo_hash }}&amp;{% endif %}controls=0&amp;keyboard=0&amp;pip=0&amp;dnt=1&amp;title=0&amp;byline=0&amp;portrait=0" title="{{ seminar.title }}" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      {% else %}
       <video preload="metadata" playsinline disablepictureinpicture controlslist="nodownload noplaybackrate" src="/app/seminare/{{ seminar.id }}/video"></video>
+      {% endif %}
       <div class="player-overlay" data-overlay><button type="button" class="player-big" data-play aria-label="Abspielen">▶</button></div>
       <div class="player-bar">
         <button type="button" class="player-btn" data-play aria-label="Abspielen / Pause">▶</button>
@@ -94,4 +98,4 @@
   </aside>
 </div>
 {% endblock %}
-{% block scripts %}<script src="/js/player.js?v={{ assetVersion }}" defer></script>{% endblock %}
+{% block scripts %}{% if seminar.vimeo_id %}<script src="/js/vendor/vimeo-player.min.js?v={{ assetVersion }}" defer></script>{% endif %}<script src="/js/player.js?v={{ assetVersion }}" defer></script>{% endblock %}

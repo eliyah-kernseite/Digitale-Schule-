@@ -37,6 +37,8 @@ function loadConfig(env = process.env) {
     secret: env.SESSION_SECRET || '',
     passwordCost: int(env.PASSWORD_COST, isTest ? 1024 : 32768),
     requireAdmin2fa: bool(env.REQUIRE_ADMIN_2FA, true),
+    // Gleichzeitig angemeldete Geräte pro Konto; das älteste fliegt raus (erschwert Konto-Teilen).
+    maxDevices: Math.max(1, int(env.MAX_DEVICES, 3)),
     priceLabel: env.PRICE_LABEL || '39',
     priceNote: env.PRICE_NOTE || 'pro Monat, monatlich kündbar',
     telegramPriceLabel: env.TELEGRAM_PRICE_LABEL || '9',

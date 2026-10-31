@@ -122,3 +122,69 @@ test('Alle öffentlichen Seiten und Lehrgänge rendern ohne Fehler', async (t) =
     assert.equal((await fetch(app.base + url)).status, 200, url);
   }
 });
+
+test('Ohne Abo bleibt alles hinter der Paywall, ohne Login hinter dem Login', async (t) => {
+  const app = await startApp();
+  t.after(() => app.stop());
+  const [s1] = (function publish() {
+    const subject = app.db.get("SELECT id FROM subjects WHERE slug = 'persoenlichkeit'");
+    app.db.run("UPDATE seminars SET video_file = ?, video_duration = 30, published = 1 WHERE subject_id = ?", 'a'.repeat(32) + '.mp4', subject.id);
+    return app.db.all('SELECT * FROM seminars WHERE subject_id = ? ORDER BY position', subject.id);
+  })();
+  const guarded = ['/app/lehrgaenge', '/app/lehrgaenge/persoenlichkeit', '/app/seminare', `/app/seminare/${s1.id}`, `/app/seminare/${s1.id}/video`, '/app/zeugnis', '/app/community'];
+
+  const guest = new Client(app.base);
+  assert.equal((await guest.get('/admin')).status, 404, 'Adminbereich verrät nicht einmal, dass es ihn gibt');
+  for (const url of [...guarded, '/app', '/app/konto', '/app/freischalten']) {
+    const res = await guest.get(url);
+    assert.equal(res.status, 303, url);
+    assert.match(res.location, /^\/login/, url);
+  }
+
+  const free = await signup(app);
+  for (const url of guarded) {
+    const res = await free.get(url);
+    assert.equal(res.status, 303, url);
+    assert.match(res.location, /^\/app\?hinweis=kein-zugang/, url);
+  }
+  for (const [url, form] of [[`/app/seminare/${s1.id}/aufgabe`, { answer: 'Ich will rein ohne zu zahlen.' }], ['/app/zeugnis/routine', {}], ['/app/community/einladung', {}], ['/app/community/telegram', { waiver: 'on' }]]) {
+    const res = await free.post(url, form);
+    assert.equal(res.status, 303, url);
+    assert.match(res.location, /kein-zugang/, url);
+  }
+  const beat = await free.request('POST', `/app/seminare/${s1.id}/fortschritt`, { json: { position: 5 }, headers: { 'x-csrf-token': free.csrf } });
+  assert.equal(beat.status, 403);
+  assert.equal(app.db.get('SELECT COUNT(*) AS n FROM submissions').n, 0);
+  assert.equal(app.db.get('SELECT COUNT(*) AS n FROM seminar_progress').n, 0);
+  assert.equal((await free.get('/admin')).status, 404, 'Adminbereich bleibt unsichtbar');
+});
+
+test('Ein kopierter Link meldet niemanden an; Geräte-Limit und Warn-Mail bei neuem Gerät', async (t) => {
+  const app = await startApp({ MAX_DEVICES: '2' });
+  t.after(() => app.stop());
+  const a = await signup(app);
+  // Die Sitzung steckt nur im HttpOnly-Cookie, nie in einer URL oder im HTML.
+  const sid = [...a.cookies].find(([k]) => k.endsWith('ds_sid'))[1];
+  const page = await a.get('/app/konto');
+  assert.ok(!page.text.includes(sid));
+  const friend = new Client(app.base);
+  assert.equal((await friend.get('/app/konto')).status, 303, 'ohne eigenes Login kein Zugang');
+
+  const mails = () => app.mailer.outbox.filter((m) => /Neue Anmeldung/.test(m.subject)).length;
+  assert.equal(mails(), 0, 'erstes Gerät: keine Warnung');
+  const login = async (c) => { await c.get('/login'); return c.post('/login', { email: 'max@example.de', password: 'Sicheres-Passwort-42', next: '/app' }); };
+
+  const b = new Client(app.base);
+  await login(b);
+  assert.equal(mails(), 1, 'neues Gerät: Warn-Mail');
+  await b.post('/logout');
+  await login(b);
+  assert.equal(mails(), 1, 'bekanntes Gerät: keine neue Mail');
+
+  const c = new Client(app.base);
+  await login(c);
+  // Limit 2: das älteste Gerät (a) ist jetzt abgemeldet
+  assert.equal((await a.get('/app/konto')).status, 303);
+  assert.equal((await b.get('/app/konto')).status, 200);
+  assert.equal((await c.get('/app/konto')).status, 200);
+});

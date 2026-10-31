@@ -63,6 +63,7 @@ moderieren, Beiträge schreiben, Warteliste (CSV), Kündigungen, Sicherheitsprot
 ## Sicherheit
 
 - Passwörter mit scrypt (gesalzen), Mindestlänge, Sperrliste, Rehash bei neuer Stärke
+- Höchstens 3 gleichzeitig angemeldete Geräte pro Konto (`MAX_DEVICES`), das älteste wird abgemeldet; Warn-Mail bei Anmeldung von einem neuen Gerät
 - Sitzungen: zufälliges Token, nur Hash in der DB, HttpOnly/Secure/SameSite, `__Host-`-Cookies, angemeldet bleiben für 30 Tage ab Login (danach neu anmelden)
 - Zwei-Faktor-Anmeldung (TOTP) mit Schutz gegen Wiederverwendung; Pflicht für Admins
 - Sperre nach Fehlversuchen, Rate-Limits auf Login, Registrierung, Reset, Formularen
@@ -80,8 +81,9 @@ moderieren, Beiträge schreiben, Warteliste (CSV), Kündigungen, Sicherheitsprot
 2. `.env` nach Vorlage `.env.example` ausfüllen, HTTPS über Reverse-Proxy (z. B. Caddy)
 3. Stripe: Produkt mit monatlichem Preis anlegen, Webhook auf `https://deine-domain.de/webhooks/stripe` mit den Ereignissen `checkout.session.completed`, `customer.subscription.created/updated/deleted`; Kundenportal aktivieren
 4. Telegram-Kreis (optional): im Stripe-Produkt einen zweiten Monatspreis anlegen (`STRIPE_TELEGRAM_PRICE_ID`), Bot anlegen, als Admin in Gruppe und Kanal, Webhook auf `/webhooks/telegram` mit `secret_token` und `allowed_updates: ["chat_member"]`
-5. `npm run create-admin -- deine@mail.de Name`, einloggen, 2FA einrichten, Videos hochladen, Seminare veröffentlichen
-6. Backups: den Ordner `DATA_DIR` (Datenbank + Videos) regelmäßig sichern
+5. Videos: entweder im Admin hochladen oder einen Vimeo-Link eintragen. Bei Vimeo unbedingt unter Datenschutz „Auf Vimeo verbergen“ und „Nur auf bestimmten Domains einbetten“ (deine Domain) setzen. Für einen Player ohne Vimeo-Steuerleiste braucht es einen Vimeo-Plan ab „Starter“; die Vorspul-Sperre greift in jedem Fall über die Player-Bibliothek und den Server.
+6. `npm run create-admin -- deine@mail.de Name`, einloggen, 2FA einrichten, Videos hochladen, Seminare veröffentlichen
+7. Backups: den Ordner `DATA_DIR` (Datenbank + Videos) regelmäßig sichern
 
 **Vor dem Start offen** (aus dem Briefing): Schulname, Logo, Domain, endgültige Preise (Platzhalter 39 € und 9 €), Lehrerprofile,
 Rechtsform/Impressum. Die Rechtstexte sind Entwürfe und müssen geprüft werden.

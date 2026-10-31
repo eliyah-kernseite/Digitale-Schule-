@@ -843,5 +843,7 @@ html.js a.course-card[data-reveal].is-in:hover { transform: translateY(-4px); }
   .checkout { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; column-gap: 32px; align-items: start; }
   .checkout .summary { grid-row: span 4; }
 }
+.player-vimeo { aspect-ratio: 16 / 9; background: #000; }
+.player-vimeo iframe { width: 100%; height: 100%; border: 0; display: block; }
 
 .preview-banner { background: var(--brass); color: var(--ink); font: 700 0.85rem/1.4 var(--body); padding: 8px 16px; text-align: center; }
