@@ -2,7 +2,7 @@
 
 const { randomToken, sha256 } = require('./crypto');
 
-const IDLE_MS = 7 * 24 * 3600 * 1000; // 7 Tage ohne Aktivität
+const IDLE_MS = 30 * 24 * 3600 * 1000; // angemeldet bleiben: 30 Tage, auch ohne Besuch dazwischen
 const ABSOLUTE_MS = 30 * 24 * 3600 * 1000; // spätestens nach 30 Tagen neu anmelden
 const MFA_MS = 10 * 60 * 1000; // 10 Minuten für die Eingabe des 2FA-Codes
 const TOUCH_MS = 5 * 60 * 1000;

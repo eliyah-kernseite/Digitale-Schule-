@@ -63,7 +63,7 @@ moderieren, Beiträge schreiben, Warteliste (CSV), Kündigungen, Sicherheitsprot
 ## Sicherheit
 
 - Passwörter mit scrypt (gesalzen), Mindestlänge, Sperrliste, Rehash bei neuer Stärke
-- Sitzungen: zufälliges Token, nur Hash in der DB, HttpOnly/Secure/SameSite, `__Host-`-Cookies, Ablauf nach 7 Tagen Inaktivität bzw. 30 Tagen
+- Sitzungen: zufälliges Token, nur Hash in der DB, HttpOnly/Secure/SameSite, `__Host-`-Cookies, angemeldet bleiben für 30 Tage ab Login (danach neu anmelden)
 - Zwei-Faktor-Anmeldung (TOTP) mit Schutz gegen Wiederverwendung; Pflicht für Admins
 - Sperre nach Fehlversuchen, Rate-Limits auf Login, Registrierung, Reset, Formularen
 - Keine Auskunft, ob eine E-Mail existiert (Registrierung, Login, Passwort vergessen)
