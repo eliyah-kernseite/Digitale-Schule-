@@ -1,0 +1,16 @@
+{% from "partials/icons.njk" import icon %}
+<div class="join-card cut" data-glow>
+  <p class="join-kicker">{{ icon('bolt') }} Kostenlos starten</p>
+  <p class="h2">Dein Konto in einer Minute.</p>
+  <ul class="ticks">
+    <li>{{ icon('check') }} Alle Lehrgänge und Seminare im Überblick</li>
+    <li>{{ icon('check') }} Preise sehen, bevor du irgendetwas zahlst</li>
+    <li>{{ icon('check') }} Keine Zahlungsdaten für die Registrierung</li>
+  </ul>
+  {% if user %}
+    <a class="btn btn-block btn-big" href="/app">Zu meinem Bereich {{ icon('arrow') }}</a>
+  {% else %}
+    <a class="btn btn-block btn-big" href="/registrieren">Kostenlos registrieren {{ icon('arrow') }}</a>
+    <p class="small muted center">Schon dabei? <a href="/login">Zum Login</a></p>
+  {% endif %}
+</div>

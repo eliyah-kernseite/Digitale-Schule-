@@ -1,4 +1,5 @@
 {% extends "layout/base.njk" %}
+{% from "partials/icons.njk" import icon %}
 {% block bodyClass %}app-page{% endblock %}
 {% block header %}
 <header class="app-top">
@@ -26,11 +27,11 @@
       <a href="/admin/protokoll" {% if path.startsWith('/admin/protokoll') %}aria-current="page"{% endif %}>Protokoll</a>
       <a href="/app" class="nav-sep">Zum Mitgliederbereich</a>
     {% else %}
-      <a href="/app" {% if path == '/app' or path == '/app/' %}aria-current="page"{% endif %}>Übersicht</a>
-      <a href="/app/seminare" {% if path.startsWith('/app/seminare') %}aria-current="page"{% endif %}>Seminare</a>
-      <a href="/app/zeugnis" {% if path.startsWith('/app/zeugnis') %}aria-current="page"{% endif %}>Mein Zeugnis</a>
-      <a href="/app/community" {% if path.startsWith('/app/community') %}aria-current="page"{% endif %}>Community</a>
-      <a href="/app/konto" {% if path.startsWith('/app/konto') %}aria-current="page"{% endif %}>Konto &amp; Abo</a>
+      <a href="/app" {% if path == '/app' or path == '/app/' or path == '/app/freischalten' %}aria-current="page"{% endif %}>{{ icon('bolt') }}<span>Übersicht</span></a>
+      <a href="/app/lehrgaenge" {% if path.startsWith('/app/lehrgaenge') or path.startsWith('/app/seminare') %}aria-current="page"{% endif %}>{{ icon('play') }}<span>Lehrgänge</span></a>
+      <a href="/app/zeugnis" {% if path.startsWith('/app/zeugnis') %}aria-current="page"{% endif %}>{{ icon('chart') }}<span>Mein Zeugnis</span></a>
+      <a href="/app/community" {% if path.startsWith('/app/community') %}aria-current="page"{% endif %}>{{ icon('telegram') }}<span>Community</span></a>
+      <a href="/app/konto" {% if path.startsWith('/app/konto') %}aria-current="page"{% endif %}>{{ icon('card') }}<span>Konto &amp; Abo</span></a>
       {% if user.isAdmin %}<a href="/admin" class="nav-sep">Adminbereich</a>{% endif %}
     {% endif %}
   </nav>

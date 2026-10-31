@@ -7,6 +7,7 @@ const QRCode = require('qrcode');
 const v = require('../validate');
 const { nowIso } = require('../db');
 const { requireAuth, requireAccessWith } = require('./guards');
+const { paywallData } = require('./paywall');
 const { checkPasswordPolicy, hashPassword, verifyPassword } = require('../security/passwords');
 const { generateSecret, verifyTotp, otpauthUri } = require('../security/totp');
 
@@ -31,39 +32,60 @@ module.exports = function memberRoutes(ctx) {
 
   /* ---------- Übersicht ---------- */
 
+  function renderPaywall(req, res) {
+    res.render('member/paywall.njk', { title: 'Freischalten', aborted: req.query.abgebrochen === '1', ...paywallData(ctx, req.user) });
+  }
+
   router.get('/', (req, res) => {
-    const access = learning.hasAccess(req.user);
+    if (!learning.hasAccess(req.user)) return renderPaywall(req, res);
     const day = Math.floor(Date.now() / 86400000);
-    const data = { title: 'Übersicht', access, quote: MOTIVATION[day % MOTIVATION.length], sub: learning.subscriptionOf(req.user.id) };
-    if (access) {
-      data.courses = liveSubjects().map((s) => ({ subject: s, ...learning.courseSummary(req.user.id, s.id) }));
-      data.streak = learning.streak(req.user.id);
-      data.tests = learning.selfTests(req.user.id);
-      data.goal = learning.goal(req.user.id);
-      const primary = data.courses[0];
-      if (primary && primary.lastDone && primary.next) {
-        const sub = db.get('SELECT content FROM submissions WHERE user_id = ? AND seminar_id = ?', req.user.id, primary.lastDone.id);
-        data.lastTask = sub ? { seminar: primary.lastDone, content: sub.content } : null;
-      }
+    const courses = liveSubjects().map((s) => ({ subject: s, ...learning.courseSummary(req.user.id, s.id) }));
+    // Weitermachen: der Lehrgang mit Fortschritt, der noch nicht fertig ist, sonst der erste.
+    const current = courses.find((c) => c.done > 0 && !c.finished && c.next) || courses.find((c) => c.next) || courses[0] || null;
+    let lastTask = null;
+    if (current && current.lastDone && current.next) {
+      const sub = db.get('SELECT content FROM submissions WHERE user_id = ? AND seminar_id = ?', req.user.id, current.lastDone.id);
+      lastTask = sub ? { seminar: current.lastDone, content: sub.content } : null;
     }
-    res.render('member/dashboard.njk', data);
+    res.render('member/dashboard.njk', {
+      title: 'Übersicht',
+      quote: MOTIVATION[day % MOTIVATION.length],
+      courses,
+      current,
+      lastTask,
+      totalDone: courses.reduce((n, c) => n + c.done, 0),
+      streak: learning.streak(req.user.id),
+      tests: learning.selfTests(req.user.id),
+      goal: learning.goal(req.user.id),
+      hasTelegram: learning.hasTelegram(req.user),
+    });
   });
 
-  /* ---------- Seminare ---------- */
+  router.get('/freischalten', (req, res) => {
+    if (learning.hasAccess(req.user)) return res.redirect(303, '/app');
+    renderPaywall(req, res);
+  });
 
-  router.get('/seminare', requireAccess, (req, res) => {
+  /* ---------- Lehrgänge und Seminare ---------- */
+
+  router.get(['/lehrgaenge', '/seminare'], requireAccess, (req, res) => {
     const subjects = learning.subjects();
-    const courses = subjects.filter((s) => s.status === 'live').map((s) => {
-      const summary = learning.courseSummary(req.user.id, s.id);
-      const blocks = [];
-      for (const item of summary.items) {
-        let block = blocks.find((b) => b.title === item.block_title);
-        if (!block) blocks.push((block = { title: item.block_title, items: [] }));
-        block.items.push(item);
-      }
-      return { subject: s, ...summary, blocks };
-    });
-    res.render('member/seminars.njk', { title: 'Seminare', courses, soon: subjects.filter((s) => s.status === 'soon') });
+    const courses = subjects.filter((s) => s.status === 'live').map((s) => ({ subject: s, ...learning.courseSummary(req.user.id, s.id) }));
+    res.render('member/courses.njk', { title: 'Lehrgänge', courses, soon: subjects.filter((s) => s.status === 'soon') });
+  });
+
+  router.get('/lehrgaenge/:slug', requireAccess, (req, res, next) => {
+    const slug = v.slug(req.params.slug);
+    const subject = slug && learning.subjectBySlug(slug);
+    if (!subject || subject.status !== 'live') return next();
+    const summary = learning.courseSummary(req.user.id, subject.id);
+    const blocks = [];
+    for (const item of summary.items) {
+      let block = blocks.find((b) => b.title === item.block_title);
+      if (!block) blocks.push((block = { title: item.block_title, items: [] }));
+      block.items.push(item);
+    }
+    res.render('member/course.njk', { title: subject.title, subject, ...summary, blocks });
   });
 
   function loadSeminar(req, res, next) {
@@ -72,7 +94,7 @@ module.exports = function memberRoutes(ctx) {
     const result = learning.openSeminar(req.user, id);
     if (!result.seminar) {
       if (result.reason === 'locked') {
-        if (req.method === 'GET' && !req.path.endsWith('/video')) return res.redirect(303, '/app/seminare?hinweis=gesperrt');
+        if (req.method === 'GET' && !req.path.endsWith('/video')) return res.redirect(303, '/app/lehrgaenge?hinweis=gesperrt');
         return res.status(403).json({ error: 'Seminar gesperrt.' });
       }
       if (result.reason === 'no_access') return res.redirect(303, '/app?hinweis=kein-zugang');
@@ -243,11 +265,36 @@ module.exports = function memberRoutes(ctx) {
 
   /* ---------- Community ---------- */
 
-  router.get('/community', requireAccess, (req, res) => {
-    res.render('member/community.njk', { title: 'Community', enabled: telegram.enabled });
+  function renderCommunity(req, res, extra = {}) {
+    const sub = learning.subscriptionOf(req.user.id);
+    res.status(extra.status || 200).render('member/community.njk', {
+      title: 'Community',
+      enabled: telegram.enabled,
+      hasTelegram: learning.hasTelegram(req.user),
+      // Zubuchen geht nur mit eigenem, laufendem Abo (nicht bei Team-Freischaltung).
+      canBook: ctx.telegramAddon && Boolean(sub && sub.subscription_id && ['active', 'trialing', 'past_due'].includes(sub.status)),
+      sub,
+      ...extra,
+    });
+  }
+
+  router.get('/community', requireAccess, (req, res) => renderCommunity(req, res));
+
+  router.post('/community/telegram', requireAccess, limit('tg-addon', 10, 3600_000, (req) => `u${req.user.id}`), async (req, res) => {
+    if (!ctx.telegramAddon) return res.redirect(303, '/app/community');
+    if (!v.checkbox(req.body.waiver)) return renderCommunity(req, res, { status: 422, bookError: 'Bitte bestätige, dass der Zugang sofort beginnen soll.' });
+    try {
+      const ok = await payments.setTelegramAddon(req.user.id, true);
+      if (!ok) return renderCommunity(req, res, { status: 422, bookError: 'Den Telegram-Kreis kannst du zu einem laufenden Abo dazubuchen.' });
+    } catch (err) {
+      logger.error(`[telegram-zusatz] ${err.message}`);
+      return renderCommunity(req, res, { status: 502, bookError: 'Das hat gerade nicht geklappt. Es wurde nichts berechnet. Versuch es gleich noch einmal.' });
+    }
+    res.redirect(303, '/app/community?hinweis=telegram-gebucht');
   });
 
   router.post('/community/einladung', requireAccess, limit('tg-invite', 5, 3600_000, (req) => `u${req.user.id}`), async (req, res) => {
+    if (!learning.hasTelegram(req.user)) return res.redirect(303, '/app/community');
     let links = [];
     let error = null;
     try {
@@ -256,7 +303,7 @@ module.exports = function memberRoutes(ctx) {
       logger.error(`[telegram] ${err.message}`);
       error = 'Die Einladung konnte gerade nicht erstellt werden. Versuch es gleich noch einmal.';
     }
-    res.render('member/community.njk', { title: 'Community', enabled: telegram.enabled, links, error });
+    renderCommunity(req, res, { links, error });
   });
 
   /* ---------- Konto & Abo ---------- */
@@ -351,6 +398,16 @@ module.exports = function memberRoutes(ctx) {
     }
   });
 
+  router.post('/konto/telegram/beenden', async (req, res) => {
+    try {
+      const ok = await payments.setTelegramAddon(req.user.id, false);
+      res.redirect(303, `/app/konto?hinweis=${ok ? 'telegram-beendet' : 'abo-fehler'}#abo`);
+    } catch (err) {
+      logger.error(`[telegram-zusatz] ${err.message}`);
+      res.redirect(303, '/app/konto?hinweis=abo-fehler#abo');
+    }
+  });
+
   router.post('/konto/abo/verwalten', async (req, res) => {
     try {
       const url = await payments.portalUrl(req.user.id);
@@ -367,7 +424,7 @@ module.exports = function memberRoutes(ctx) {
     const data = {
       exportiert_am: nowIso(),
       konto: db.get('SELECT email, first_name, role, email_verified_at, totp_enabled, created_at FROM users WHERE id = ?', uid),
-      abo: db.get('SELECT provider, status, current_period_end, cancel_at_period_end, started_at FROM subscriptions WHERE user_id = ?', uid) || null,
+      abo: db.get('SELECT provider, status, current_period_end, cancel_at_period_end, telegram_addon, started_at FROM subscriptions WHERE user_id = ?', uid) || null,
       aufgaben: db.all('SELECT s.title AS seminar, sub.content, sub.submitted_at FROM submissions sub JOIN seminars s ON s.id = sub.seminar_id WHERE sub.user_id = ?', uid),
       fortschritt: db.all('SELECT s.title AS seminar, p.watched_seconds, p.video_done_at FROM seminar_progress p JOIN seminars s ON s.id = p.seminar_id WHERE p.user_id = ?', uid),
       selbsttests: db.all('SELECT week, clarity, confidence, discipline, calm, goal_progress, created_at FROM self_tests WHERE user_id = ?', uid),

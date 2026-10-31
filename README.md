@@ -20,23 +20,28 @@ Seminare, Anti-Vorspulen, Zahlung inkl. Stripe-Webhook, Kündigung, Admin, Uploa
 
 ## Vorschau auf GitHub Pages
 
-GitHub Pages kann keinen Node-Server ausführen. Deshalb gibt es eine statische Vorschau in `docs/` (öffentliche Seiten plus ein Beispiel-Mitgliederbereich mit Demo-Daten). Neu erzeugen mit `npm run build:static`. In den Pages-Einstellungen entweder `main` / `/docs` oder `main` / Root wählen (die `index.html` im Root leitet nach `docs/` weiter). Login, Zahlung, Formulare und Videos funktionieren nur auf dem echten Server.
+GitHub Pages kann keinen Node-Server ausführen. Deshalb gibt es eine statische Vorschau in `docs/` (öffentliche Seiten plus ein Beispiel-Mitgliederbereich mit Demo-Daten). Neu erzeugen mit `npm run build:static`. In den Pages-Einstellungen entweder `main` / `/docs` oder `main` / Root wählen (die `index.html` im Root leitet nach `docs/` weiter). Registrieren und Login führen in der Vorschau direkt in die Demo (Paywall bzw. Mitgliederbereich). Zahlung, Formulare und Videos funktionieren nur auf dem echten Server.
 
 ## Was drin ist
 
 **Öffentliche Seiten:** Startseite (alle Abschnitte aus dem Briefing), Fächer und
-Fachseiten mit Warteliste (Double-Opt-in), „So funktioniert’s“ als ausführliche
-Erklärseite, Lehrplan, Community, Beiträge, Mitgliedschaft, „Verträge hier kündigen“
+Fachseiten mit Warteliste (Double-Opt-in), „So läuft’s“ als ausführliche
+Erklärseite, Lehrplan, Community, Beiträge, „Verträge hier kündigen“
 (ohne Login, § 312k BGB), Impressum/Datenschutz/AGB/Widerruf als Entwürfe.
 
-**Mitgliederbereich:** Übersicht mit Fortschritt, nächstem Seminar und Routine-Streak;
-Seminare in fester Reihenfolge; Seminar-Seite mit Video, Kapitelmarken und Aufgabe;
+**Registrierung und Paywall:** Die Registrierung ist kostenlos. Preise stehen nicht auf
+den öffentlichen Seiten: Wer ohne Abo einloggt, landet in der Paywall (`/app/freischalten`)
+mit allen Lehrgängen, der Mitgliedschaft und dem optionalen Telegram-Kreis.
+
+**Mitgliederbereich:** Übersicht mit „Weitermachen“, Routine-Streak und allen Lehrgängen;
+Lehrgänge mit Seminaren in fester Reihenfolge; Seminar-Seite mit Video, Kapitelmarken und Aufgabe;
 Zeugnis (Selbsttest Woche 0 und Woche 12, Ziel, Routine, Druckansicht); Community
-(persönliche Telegram-Einladungen); Konto & Abo (Kündigen/Fortsetzen, Zahlungsportal,
+(Telegram-Kreis als buchbarer Zusatz zum Abo, danach persönliche Einladungen; endet der
+Zusatz oder das Abo, entfernt der Bot die Person); Konto & Abo (Kündigen/Fortsetzen, Zahlungsportal,
 Passwort, Zwei-Faktor-Anmeldung, Geräte abmelden, Datenexport, Konto löschen).
 
-**Fächer/Kategorien:** Persönlichkeitsentwicklung ist live, „Selbstständig Geld
-verdienen“ und „Körperliche Fitness“ stehen auf „bald“ mit Warteliste. Im Admin
+**Lehrgänge:** Mindset & Persönlichkeit, Fitness & Körper, Geld verdienen, Liebe &
+Beziehung und Mentale Stärke sind live, Auftreten & Stil steht auf „bald“ mit Warteliste. Im Admin
 unter *Fächer* auf „live“ stellen, sobald Videos hochgeladen und veröffentlicht sind.
 Mit der Mitgliedschaft sind alle Fächer freigeschaltet.
 
@@ -74,11 +79,11 @@ moderieren, Beiträge schreiben, Warteliste (CSV), Kündigungen, Sicherheitsprot
 1. Server mit Node 22.13+ (oder Docker: `docker build -t schule . && docker run -p 3000:3000 -v schule-data:/data --env-file .env schule`)
 2. `.env` nach Vorlage `.env.example` ausfüllen, HTTPS über Reverse-Proxy (z. B. Caddy)
 3. Stripe: Produkt mit monatlichem Preis anlegen, Webhook auf `https://deine-domain.de/webhooks/stripe` mit den Ereignissen `checkout.session.completed`, `customer.subscription.created/updated/deleted`; Kundenportal aktivieren
-4. Telegram (optional): Bot anlegen, als Admin in Gruppe und Kanal, Webhook auf `/webhooks/telegram` mit `secret_token` und `allowed_updates: ["chat_member"]`
+4. Telegram-Kreis (optional): im Stripe-Produkt einen zweiten Monatspreis anlegen (`STRIPE_TELEGRAM_PRICE_ID`), Bot anlegen, als Admin in Gruppe und Kanal, Webhook auf `/webhooks/telegram` mit `secret_token` und `allowed_updates: ["chat_member"]`
 5. `npm run create-admin -- deine@mail.de Name`, einloggen, 2FA einrichten, Videos hochladen, Seminare veröffentlichen
 6. Backups: den Ordner `DATA_DIR` (Datenbank + Videos) regelmäßig sichern
 
-**Vor dem Start offen** (aus dem Briefing): Schulname, Logo, Domain, Preis, Lehrerprofil,
+**Vor dem Start offen** (aus dem Briefing): Schulname, Logo, Domain, endgültige Preise (Platzhalter 39 € und 9 €), Lehrerprofile,
 Rechtsform/Impressum. Die Rechtstexte sind Entwürfe und müssen geprüft werden.
 
 ## Hausschrift „Fundament Display“

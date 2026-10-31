@@ -8,6 +8,12 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+/** Ergänzt Spalten, die nach dem ersten Start dazugekommen sind. */
+function migrate(db) {
+  const columns = db.prepare('PRAGMA table_info(subscriptions)').all().map((c) => c.name);
+  if (!columns.includes('telegram_addon')) db.exec('ALTER TABLE subscriptions ADD COLUMN telegram_addon INTEGER NOT NULL DEFAULT 0');
+}
+
 /**
  * Öffnet die SQLite-Datenbank, setzt sichere Pragmas und spielt das Schema ein.
  * Alle Abfragen im Projekt laufen über vorbereitete Statements mit Parametern,
@@ -21,6 +27,7 @@ function openDatabase(file) {
   db.exec('PRAGMA busy_timeout = 5000');
   db.exec('PRAGMA secure_delete = ON');
   db.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
+  migrate(db);
 
   const cache = new Map();
   const stmt = (sql) => {

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% if title %}{{ title }} · {% endif %}{{ schoolName }}</title>
-  <meta name="description" content="{{ metaDescription or 'Die digitale Schule für Männer. Persönlichkeit, Geld und Fitness. Echter Unterricht, messbarer Fortschritt.' }}">
-  <meta name="theme-color" content="#16130f">
+  <meta name="description" content="{{ metaDescription or 'Die Schule für Männer, die mehr wollen. Mindset, Fitness, Geld, Liebe und mentale Stärke in Lehrgängen mit Aufgaben und Zeugnis. Kostenlos registrieren.' }}">
+  <meta name="theme-color" content="#0f0d0b">
   <link rel="preload" href="/fonts/fundament-display.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/main.css?v={{ assetVersion }}">
   <link rel="icon" href="/img/icon.svg" type="image/svg+xml">
@@ -13,22 +13,22 @@
 </head>
 <body class="{% block bodyClass %}{% endblock %}">
   <a class="skip" href="#inhalt">Zum Inhalt springen</a>
+  <div class="scroll-bar" aria-hidden="true"></div>
   {% block header %}
   <header class="site-header">
     <div class="wrap header-row">
       <a class="logo" href="/" aria-label="{{ schoolName }} Startseite">{% include "partials/logo.njk" %}</a>
       <button class="nav-btn" type="button" aria-expanded="false" aria-controls="hauptmenue" aria-label="Menü"><span></span><span></span><span></span></button>
         <nav class="site-nav" id="hauptmenue" aria-label="Hauptmenü">
-          <a href="/faecher" {% if path.startsWith('/faecher') %}aria-current="page"{% endif %}>Fächer</a>
-          <a href="/so-funktionierts" {% if path == '/so-funktionierts' %}aria-current="page"{% endif %}>So funktioniert’s</a>
-          <a href="/lehrplan" {% if path == '/lehrplan' %}aria-current="page"{% endif %}>Lehrplan</a>
+          <a href="/faecher" {% if path.startsWith('/faecher') or path == '/lehrplan' %}aria-current="page"{% endif %}>Lehrgänge</a>
+          <a href="/so-funktionierts" {% if path == '/so-funktionierts' %}aria-current="page"{% endif %}>So läuft’s</a>
           <a href="/community" {% if path == '/community' %}aria-current="page"{% endif %}>Community</a>
           <a href="/beitraege" {% if path.startsWith('/beitraege') %}aria-current="page"{% endif %}>Beiträge</a>
           {% if user %}
             <a class="btn btn-small" href="/app">Mein Bereich</a>
           {% else %}
             <a class="nav-login" href="/login">Login</a>
-            <a class="btn btn-small" href="/mitgliedschaft">Mitglied werden</a>
+            <a class="btn btn-small" href="/registrieren">Kostenlos starten</a>
           {% endif %}
         </nav>
     </div>
@@ -48,7 +48,7 @@
     <div class="wrap footer-grid">
       <div>
         <a class="logo logo-footer" href="/">{% include "partials/logo.njk" %}</a>
-        <p class="muted small">Die digitale Schule für Männer. Fortschritt statt Versprechen.</p>
+        <p class="muted small">Die Schule für Männer, die mehr aus ihrem Leben machen wollen.</p>
       </div>
       <nav aria-label="Rechtliches" class="footer-links">
         <a href="/impressum">Impressum</a>

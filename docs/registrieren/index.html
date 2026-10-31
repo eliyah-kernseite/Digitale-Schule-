@@ -4,30 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Konto erstellen · Fundament</title>
-  <meta name="description" content="Die digitale Schule für Männer. Persönlichkeit, Geld und Fitness. Echter Unterricht, messbarer Fortschritt.">
-  <meta name="theme-color" content="#16130f">
+  <meta name="description" content="Die Schule für Männer, die mehr wollen. Mindset, Fitness, Geld, Liebe und mentale Stärke in Lehrgängen mit Aufgaben und Zeugnis. Kostenlos registrieren.">
+  <meta name="theme-color" content="#0f0d0b">
   <link rel="preload" href="../fonts/fundament-display.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../css/main.css">
   <link rel="icon" href="../img/icon.svg" type="image/svg+xml">
   
 </head>
-<body class="auth-page"><div class="preview-banner">Vorschau ohne Server: Login, Zahlung, Formulare und Videos funktionieren erst auf dem echten Server.</div>
+<body class="auth-page"><div class="preview-banner">Vorschau ohne Server: Registrieren und Login führen direkt in die Demo. Zahlung und Videos laufen erst auf dem echten Server.</div>
   <a class="skip" href="#inhalt">Zum Inhalt springen</a>
+  <div class="scroll-bar" aria-hidden="true"></div>
   
   <header class="site-header">
     <div class="wrap header-row">
-      <a class="logo" href="../" aria-label="Fundament Startseite"><svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M0 9 9 0h31v40H0z" fill="currentColor"/><path d="M13 9h16v6H19v4h8v6h-8v8h-6z" fill="var(--logo-cut, #16130f)"/></svg><span class="logo-word">Fundament</span>
+      <a class="logo" href="../" aria-label="Fundament Startseite"><svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M0 9 9 0h31v40H0z" fill="currentColor"/><path d="M13 9h16v6H19v4h8v6h-8v8h-6z" fill="var(--logo-cut, #0f0d0b)"/></svg><span class="logo-word">Fundament</span>
 </a>
       <button class="nav-btn" type="button" aria-expanded="false" aria-controls="hauptmenue" aria-label="Menü"><span></span><span></span><span></span></button>
         <nav class="site-nav" id="hauptmenue" aria-label="Hauptmenü">
-          <a href="../faecher/" >Fächer</a>
-          <a href="../so-funktionierts/" >So funktioniert’s</a>
-          <a href="../lehrplan/" >Lehrplan</a>
+          <a href="../faecher/" >Lehrgänge</a>
+          <a href="../so-funktionierts/" >So läuft’s</a>
           <a href="../community/" >Community</a>
           <a href="../beitraege/" >Beiträge</a>
           
             <a class="nav-login" href="../login/">Login</a>
-            <a class="btn btn-small" href="../mitgliedschaft/">Mitglied werden</a>
+            <a class="btn btn-small" href="../registrieren/">Kostenlos starten</a>
           
         </nav>
     </div>
@@ -41,24 +41,30 @@
 <section class="section">
   <div class="wrap auth-grid">
     <div class="auth-side">
-      <p class="eyebrow">Fundament</p>
-      <p class="display-sm">Der erste Schritt ist der wichtigste. Gut, dass du ihn gehst.</p>
+      <p class="mega" data-reveal>Der erste Schritt ist der schwerste. Du gehst ihn gerade.</p>
+      
+<ul class="ticks" data-reveal>
+  <li><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Kostenlos und ohne Zahlungsdaten</li>
+  <li><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Danach siehst du alle Lehrgänge und Preise</li>
+  <li><svg class="ico " viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg> Deine Daten bleiben bei uns, kein Tracking</li>
+</ul>
+
     </div>
     <div class="panel cut auth-panel">
       
-<h1 class="h2">Konto erstellen</h1>
+<h1 class="h2">Kostenlos registrieren</h1>
 
   
 
 <form method="post" action="../registrieren/" class="stack" novalidate>
-  <input type="hidden" name="_csrf" value="5gqFyvRSGfdJJNjln5VrwgQMXlspLeajAb-jTb4wfJE">
+  <input type="hidden" name="_csrf" value="Xb68nsrNDkj63tDh9hTu8Uggg9IhIl-fjjEXZajjOcw">
   <label>Vorname<input name="first_name" value="" required minlength="2" maxlength="60" autocomplete="given-name"></label>
   <label>E-Mail-Adresse<input type="email" name="email" value="" required maxlength="254" autocomplete="email"></label>
   <label>Passwort <span class="muted small">(mindestens 10 Zeichen)</span><input type="password" name="password" required minlength="10" maxlength="200" autocomplete="new-password" data-strength></label>
   <p class="strength small muted" aria-live="polite" hidden></p>
   <label>Passwort wiederholen<input type="password" name="password2" required minlength="10" maxlength="200" autocomplete="new-password"></label>
   <label class="check"><input type="checkbox" name="consent" required> <span>Ich habe die <a href="../agb/" target="_blank" rel="noopener">AGB</a> und die <a href="../datenschutz/" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen.</span></label>
-  <button class="btn btn-block" type="submit">Konto erstellen</button>
+  <button class="btn btn-block btn-big" type="submit">Konto kostenlos erstellen</button>
 </form>
 <p class="small">Schon dabei? <a href="../login/">Zum Login</a></p>
 
@@ -72,9 +78,9 @@
   <footer class="site-footer">
     <div class="wrap footer-grid">
       <div>
-        <a class="logo logo-footer" href="../"><svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M0 9 9 0h31v40H0z" fill="currentColor"/><path d="M13 9h16v6H19v4h8v6h-8v8h-6z" fill="var(--logo-cut, #16130f)"/></svg><span class="logo-word">Fundament</span>
+        <a class="logo logo-footer" href="../"><svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M0 9 9 0h31v40H0z" fill="currentColor"/><path d="M13 9h16v6H19v4h8v6h-8v8h-6z" fill="var(--logo-cut, #0f0d0b)"/></svg><span class="logo-word">Fundament</span>
 </a>
-        <p class="muted small">Die digitale Schule für Männer. Fortschritt statt Versprechen.</p>
+        <p class="muted small">Die Schule für Männer, die mehr aus ihrem Leben machen wollen.</p>
       </div>
       <nav aria-label="Rechtliches" class="footer-links">
         <a href="../impressum/">Impressum</a>

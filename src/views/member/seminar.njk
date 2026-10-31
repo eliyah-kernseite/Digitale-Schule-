@@ -2,14 +2,15 @@
 {% from "partials/macros.njk" import csrf, ratingInput with context %}
 {% block app %}
 <header class="app-head">
-  <p class="eyebrow"><a href="/app/seminare">{{ seminar.subject_title }}</a> · {{ seminar.block_title }}</p>
+  <p class="muted small"><a href="/app/lehrgaenge/{{ seminar.subject_slug }}">{{ seminar.subject_title }}</a> · {{ seminar.block_title }}</p>
   <h1 class="h2">Seminar {{ seminar.number }} · {{ seminar.title }}</h1>
   {% if seminar.preview %}<p class="notice notice-warn">Vorschau für Admins: Dieses Seminar ist noch nicht veröffentlicht.</p>{% endif %}
 </header>
 
 {% if justDone %}
 <section class="win cut" role="status">
-  <p class="eyebrow">Geschafft</p>
+  <div class="burst" aria-hidden="true">{% for i in range(0, 14) %}<i></i>{% endfor %}</div>
+  <p class="win-kicker">Geschafft</p>
   <p class="h3">Seminar {{ seminar.number }} ist erledigt.{% if next %} Seminar {{ next.number }} ist jetzt offen.{% endif %}</p>
   {% if next %}<a class="btn btn-dark" href="/app/seminare/{{ next.id }}">Weiter zu „{{ next.title }}“</a>{% else %}<a class="btn btn-dark" href="/app/zeugnis">Zu deinem Zeugnis</a>{% endif %}
 </section>

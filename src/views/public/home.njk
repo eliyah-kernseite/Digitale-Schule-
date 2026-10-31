@@ -1,150 +1,168 @@
 {% extends "layout/base.njk" %}
 {% from "partials/macros.njk" import stars with context %}
+{% from "partials/icons.njk" import icon %}
+{% block bodyClass %}home{% endblock %}
 {% block main %}
 
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <p class="eyebrow">Die digitale Schule für Männer</p>
-      <h1 class="display">Werde der Mann, <span class="accent-line">der du sein kannst.</span></h1>
-      <p class="lead">Persönlichkeit, Geld und Fitness. Echter Unterricht mit Lehrern, Aufgaben und einem Zeugnis, das deinen Fortschritt zeigt.</p>
-      <div class="actions">
-        <a class="btn" href="/mitgliedschaft">Jetzt Mitglied werden</a>
-        <a class="btn btn-ghost" href="#lehrplan">Lehrplan ansehen</a>
+<section class="hero2">
+  <div class="hero-glow" aria-hidden="true"><span></span><span></span></div>
+  <div class="wrap hero2-grid">
+    <div class="hero2-copy">
+      <p class="pill" data-reveal><span class="pulse" aria-hidden="true"></span>{{ liveCount }} Lehrgänge sind live</p>
+      <h1 class="mega" data-reveal>Hör auf zu warten. Werde <span class="sr-only">stärker.</span>
+        <span class="rotator" data-rotator aria-hidden="true">
+          <span class="is-on">stärker.</span><span>klarer.</span><span>reicher.</span><span>gelassener.</span><span>unaufhaltsam.</span>
+        </span>
+      </h1>
+      <p class="lead" data-reveal>Die Schule für Männer, die mehr aus ihrem Leben machen wollen. Mindset, Fitness, Geld, Liebe und mentale Stärke, mit echten Lehrgängen, Aufgaben und einem Zeugnis, das dir deinen Fortschritt zeigt.</p>
+      <div class="actions" data-reveal>
+        <a class="btn btn-big" href="/registrieren">Kostenlos starten {{ icon('arrow') }}</a>
+        <a class="btn btn-ghost btn-big" href="#lehrgaenge">Lehrgänge ansehen</a>
       </div>
+      <p class="micro" data-reveal>{{ icon('check') }} Registrierung kostenlos &nbsp; {{ icon('check') }} keine Zahlungsdaten nötig</p>
     </div>
-    <aside class="hero-visual" aria-label="So sieht dein Unterricht aus">
-      <div class="timetable cut">
-        <div class="timetable-head">
-          <span class="eyebrow">Dein Stundenplan</span>
-          <span class="chip">Grundstufe</span>
+
+    <div class="hero2-visual" aria-hidden="true">
+      <div class="mock mock-main" data-float>
+        <div class="mock-top"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-url">Mein Bereich</span></div>
+        <div class="mock-body">
+          <p class="mock-label">Weitermachen</p>
+          <p class="mock-title">Das Selbstbild</p>
+          <p class="mock-sub">Mindset &amp; Persönlichkeit</p>
+          <div class="mock-video"><span class="mock-play">{{ icon('play') }}</span><span class="mock-bar"><i></i></span></div>
+          <div class="mock-row">
+            <div class="ring" data-ring="42"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" class="ring-t"/><circle cx="22" cy="22" r="18" class="ring-f"/></svg><span>42 %</span></div>
+            <div><strong>5 von 12</strong><span>Seminaren geschafft</span></div>
+          </div>
         </div>
-        {% for b in blocks %}
-        <div class="tt-row {% if loop.first %}is-now{% endif %}">
-          <span class="tt-week">Block {{ loop.index }}</span>
-          <span class="tt-title">{{ b.title }}</span>
-          <span class="tt-state">{% if loop.first %}läuft{% else %}gesperrt{% endif %}</span>
-        </div>
-        {% endfor %}
-        <p class="tt-foot">Nächstes Seminar öffnet nach deiner Aufgabe.</p>
       </div>
-    </aside>
-  </div>
-  <div class="wrap hero-facts">
-    <div><strong>{{ total }}</strong><span>Seminare in der Grundstufe</span></div>
-    <div><strong>1</strong><span>Aufgabe pro Seminar</span></div>
-    <div><strong>12</strong><span>Wochen bis zu deinem Zeugnis</span></div>
+      <div class="mock mock-chip mock-chip-a" data-float="slow">{{ icon('flame') }}<div><strong>9 Tage</strong><span>Routine am Stück</span></div></div>
+      <div class="mock mock-chip mock-chip-b" data-float="fast">{{ icon('unlock') }}<div><strong>Seminar 6 offen</strong><span>Aufgabe abgegeben</span></div></div>
+    </div>
   </div>
 </section>
 
-<section class="section" id="faecher">
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    {% for round in [1, 2] %}
+      {% for s in subjects %}<span>{{ s.title }}</span><b>✦</b>{% endfor %}
+      <span>Disziplin</span><b>✦</b><span>Selbstvertrauen</span><b>✦</b>
+    {% endfor %}
+  </div>
+</div>
+
+<section class="section statement">
   <div class="wrap">
-    <header class="section-head">
-      <h2 class="h2">Deine Fächer</h2>
-      <p class="lead">Drei Bereiche, ein Ziel: ein starkes Leben.</p>
+    <p class="statement-text" data-words>Du spürst schon lange, dass mehr in dir steckt. Mehr Kraft. Mehr Geld auf dem Konto. Mehr Ruhe im Kopf. Eine Frau an deiner Seite, die dich respektiert. Was dir fehlt, ist ein Plan und Männer, die mit dir ziehen. Genau dafür gibt es diese Schule.</p>
+  </div>
+</section>
+
+<section class="section" id="lehrgaenge">
+  <div class="wrap">
+    <header class="section-head split-head">
+      <h2 class="h1" data-reveal>Alles, was einen starken Mann ausmacht.</h2>
+      <p class="lead" data-reveal>Jeder Lehrgang hat einen eigenen Lehrer, einen festen Ablauf und Aufgaben, die du in deinem echten Leben umsetzt.</p>
     </header>
-    <div class="cards cards-3">
+    <div class="subject-grid">
       {% for s in subjects %}
-      <article class="card cut {% if s.status == 'live' %}card-live{% endif %}">
-        <p class="chip {% if s.status == 'live' %}chip-live{% endif %}">{{ 'Jetzt verfügbar' if s.status == 'live' else 'Bald verfügbar' }}</p>
+      <a class="subject-card {% if s.status != 'live' %}is-soon{% endif %}" href="/faecher/{{ s.slug }}" data-reveal data-glow>
+        <span class="subject-icon">{{ icon(s.slug) }}</span>
+        <span class="subject-meta">{% if s.status == 'live' %}{{ s.count }} Seminare{% else %}Bald verfügbar{% endif %}</span>
         <h3 class="h3">{{ s.title }}</h3>
-        <p>{{ s.tagline }} {{ s.description | truncate(150) }}</p>
-        <a class="link-arrow" href="/faecher/{{ s.slug }}">{{ 'Mehr erfahren' if s.status == 'live' else 'Auf die Warteliste' }}</a>
-      </article>
+        <p>{{ s.tagline }}</p>
+        <span class="subject-go">{{ 'Reinschauen' if s.status == 'live' else 'Auf die Warteliste' }} {{ icon('arrow') }}</span>
+      </a>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<section class="section section-light" id="so-gehts">
+<section class="section section-alt" id="so-gehts">
   <div class="wrap">
     <header class="section-head">
-      <h2 class="h2">So funktioniert’s</h2>
-      <p class="lead">Kein Netzwerk zum Durchscrollen. Unterricht mit Reihenfolge.</p>
+      <h2 class="h1" data-reveal>Vom ersten Klick zum neuen Leben.</h2>
+      <p class="lead" data-reveal>Kein endloses Scrollen durch Videos. Du gehst einen klaren Weg, Schritt für Schritt.</p>
     </header>
-    <ol class="steps">
-      <li><span class="step-num">01</span><h3 class="h4">Seminar ansehen</h3><p>Kurze Videoseminare von deinem Lehrer. Ohne Vorspulen, damit nichts verloren geht.</p></li>
-      <li><span class="step-num">02</span><h3 class="h4">Aufgabe erledigen</h3><p>Jedes Seminar endet mit einer Übung für deinen Alltag.</p></li>
-      <li><span class="step-num">03</span><h3 class="h4">Nächstes freischalten</h3><p>Erst die Aufgabe, dann das nächste Seminar. So baut eins aufs andere auf.</p></li>
-      <li><span class="step-num">04</span><h3 class="h4">Fortschritt sehen</h3><p>Dein Zeugnis zeigt schwarz auf weiß, wie du wächst.</p></li>
+    <ol class="path" data-path>
+      <li data-reveal><span class="path-icon">{{ icon('users') }}</span><h3 class="h4">Kostenlos registrieren</h3><p>In einer Minute hast du dein Konto. Danach siehst du jeden Lehrgang und alle Preise.</p></li>
+      <li data-reveal><span class="path-icon">{{ icon('unlock') }}</span><h3 class="h4">Freischalten</h3><p>Eine Mitgliedschaft öffnet alle Lehrgänge. Monatlich kündbar, mit einem Klick.</p></li>
+      <li data-reveal><span class="path-icon">{{ icon('play') }}</span><h3 class="h4">Ansehen und umsetzen</h3><p>Jedes Seminar endet mit einer Aufgabe. Erst wenn du sie erledigst, geht das nächste auf.</p></li>
+      <li data-reveal><span class="path-icon">{{ icon('chart') }}</span><h3 class="h4">Aufsteigen</h3><p>Nach zwölf Wochen hältst du dein Zeugnis in der Hand und siehst, wie weit du gekommen bist.</p></li>
     </ol>
-    <p><a class="link-arrow" href="/so-funktionierts">Alles zum Ablauf im Detail</a></p>
+    <p data-reveal><a class="link-arrow" href="/so-funktionierts">Der ganze Ablauf im Detail</a></p>
   </div>
 </section>
 
-<section class="section" id="lehrplan">
-  <div class="wrap">
-    <header class="section-head">
-      <h2 class="h2">Der Lehrplan: {{ main.level_title }}</h2>
-      <p class="lead">{{ total }} Seminare in {{ blocks.length }} Blöcken. Du lernst in deinem Tempo, in fester Reihenfolge.</p>
-    </header>
-    {% include "partials/curriculum-grid.njk" %}
+<section class="section">
+  <div class="wrap two-col center-col">
+    <div>
+      <h2 class="h1" data-reveal>Hier wird nicht vorgespult.</h2>
+      <p class="lead" data-reveal>Wer sich durchklickt, lernt nichts. Deshalb laufen unsere Seminare in Echtzeit, und das nächste öffnet sich erst, wenn du deine Aufgabe erledigt hast. Das ist unbequem. Und genau deshalb funktioniert es.</p>
+      <ul class="ticks" data-reveal>
+        <li>{{ icon('check') }} Bereits Gesehenes kannst du jederzeit wiederholen</li>
+        <li>{{ icon('check') }} Jede Aufgabe liest dein Lehrer</li>
+        <li>{{ icon('check') }} Dein Fortschritt wird gespeichert, auch auf dem Handy</li>
+      </ul>
+    </div>
+    <div class="lockdemo cut" data-reveal aria-hidden="true">
+      <div class="lockdemo-screen"><span class="lockdemo-play">{{ icon('play') }}</span></div>
+      <div class="lockdemo-bar"><span class="lockdemo-seen"></span><span class="lockdemo-head"></span><span class="lockdemo-lock">{{ icon('lock') }}</span></div>
+      <div class="lockdemo-steps">
+        <span class="is-done">{{ icon('check') }} Video</span>
+        <span class="is-now">{{ icon('task') }} Aufgabe</span>
+        <span>{{ icon('lock') }} Nächstes Seminar</span>
+      </div>
+    </div>
   </div>
 </section>
 
 <section class="section section-alt">
   <div class="wrap two-col">
-    <article class="teacher cut">
-      <div class="teacher-photo" aria-hidden="true"><span>{{ main.teacher_name | initial }}</span></div>
-      <div>
-        <p class="eyebrow">Dein Lehrer</p>
-        <h3 class="h3">{{ main.teacher_name }}</h3>
-        <p class="muted">{{ main.title }}</p>
-        <p>{{ main.teacher_bio }}</p>
-      </div>
+    <div data-reveal>{% include "partials/report-example.njk" %}</div>
+    <article class="tg-teaser cut" data-reveal data-glow>
+      <span class="tg-badge">{{ icon('telegram') }} Telegram-Kreis</span>
+      <h2 class="h2">Du ziehst das nicht allein durch.</h2>
+      <p>Im Telegram-Kreis triffst du Männer, die denselben Weg gehen. Montags postest du dein Wochenziel, freitags dein Ergebnis. Die Lehrer teilen dort Zusatzinhalte, die es nirgendwo sonst gibt.</p>
+      <p class="muted small">Den Kreis kannst du zu deiner Mitgliedschaft dazubuchen, jederzeit und monatlich kündbar.</p>
+      <a class="link-arrow" href="/community">So läuft die Community</a>
     </article>
-    <article class="community-teaser">
-      <p class="eyebrow">Community</p>
-      <h3 class="h3">Lerne nicht allein.</h3>
-      <p>In unserer Telegram-Community hilfst du anderen und bekommst Hilfe. Exklusive Inhalte der Lehrer gibt es nur dort.</p>
-      <ul class="ritual">
-        <li><strong>Montag</strong> Wochenziel posten</li>
-        <li><strong>Freitag</strong> Ergebnis teilen</li>
-      </ul>
-      <a class="link-arrow" href="/community">Wie die Community funktioniert</a>
-    </article>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap two-col">
-    {% include "partials/report-example.njk" %}
-    {% include "partials/membership-card.njk" %}
   </div>
 </section>
 
 {% if reviews.length %}
-<section class="section section-light">
+<section class="section">
   <div class="wrap">
     <header class="section-head">
-      <h2 class="h2">Was Schüler sagen</h2>
+      <h2 class="h1" data-reveal>Das sagen unsere Schüler.</h2>
       {% if reviewStats.n >= 3 %}<p class="lead">{{ stars(reviewStats.avg | round) }} {{ reviewStats.avg }} von 5 aus {{ reviewStats.n }} Bewertungen</p>{% endif %}
     </header>
     <div class="cards cards-3">
       {% for r in reviews %}
-      <figure class="quote cut">
+      <figure class="quote cut" data-reveal>
         {{ stars(r.rating) }}
         <blockquote>{{ r.comment }}</blockquote>
         <figcaption>{{ r.first_name }} · {{ r.done }} Seminare abgeschlossen · verifizierter Schüler</figcaption>
       </figure>
       {% endfor %}
     </div>
-    <p class="small muted">Bewerten können nur Mitglieder, die mindestens drei Seminare abgeschlossen haben. Wir veröffentlichen positive wie kritische Bewertungen und entfernen nur Beleidigungen oder Spam.</p>
+    <p class="small muted">Bewerten kann nur, wer mindestens drei Seminare abgeschlossen hat. Wir zeigen gute und kritische Stimmen und entfernen nur Beleidigungen oder Spam.</p>
   </div>
 </section>
 {% endif %}
 
 <section class="section" id="fragen">
   <div class="wrap narrow">
-    <h2 class="h2">Häufige Fragen</h2>
+    <h2 class="h1" data-reveal>Fragen, die du dir gerade stellst.</h2>
     {% include "partials/faq.njk" %}
   </div>
 </section>
 
-<section class="cta-band">
-  <div class="wrap cta-row">
-    <p class="display-sm">Der beste Zeitpunkt anzufangen ist heute.</p>
-    <a class="btn btn-dark" href="/mitgliedschaft">Jetzt Mitglied werden</a>
+<section class="final-cta">
+  <div class="wrap">
+    <p class="mega final-line" data-reveal>Der Mann, der du sein willst, fängt nicht morgen an.</p>
+    <div class="actions" data-reveal>
+      <a class="btn btn-dark btn-big" href="/registrieren">Jetzt kostenlos starten {{ icon('arrow') }}</a>
+    </div>
   </div>
 </section>
 {% endblock %}

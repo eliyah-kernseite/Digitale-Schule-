@@ -1,27 +1,54 @@
 {% extends "layout/app.njk" %}
 {% from "partials/macros.njk" import csrf with context %}
+{% from "partials/icons.njk" import icon %}
 {% block app %}
 <header class="app-head">
-  <h1 class="h1">Community</h1>
-  <p class="muted">Kanal der Lehrer und Gruppe mit Themenbereichen, beides auf Telegram.</p>
+  <h1 class="mega" data-reveal>Community</h1>
+  <p class="lead" data-reveal>Allein gibst du an schlechten Tagen auf. Mit anderen an deiner Seite ziehst du durch.</p>
 </header>
-<section class="panel cut">
-  {% if not enabled %}
-    <h2 class="h3">Die Community startet in Kürze.</h2>
-    <p>Sobald der Telegram-Zugang eingerichtet ist, bekommst du hier deinen persönlichen Einladungslink.</p>
-  {% elif links and links.length %}
-    <h2 class="h3">Deine persönlichen Einladungen</h2>
-    <p>Jeder Link funktioniert genau einmal und ist eine Stunde gültig. Bitte nicht weitergeben.</p>
-    <p class="actions">{% for l in links %}<a class="btn" href="{{ l.url }}" rel="noopener noreferrer" target="_blank">{{ l.label }} öffnen</a> {% endfor %}</p>
+
+<section class="tg-hero cut" data-reveal data-glow>
+  <span class="tg-badge">{{ icon('telegram') }} Telegram-Kreis</span>
+  {% if hasTelegram %}
+    {% if not enabled %}
+      <h2 class="h2">Du bist dabei. Der Kreis öffnet in Kürze.</h2>
+      <p>Sobald der Telegram-Zugang eingerichtet ist, holst du dir hier deinen persönlichen Einladungslink.</p>
+    {% elif links and links.length %}
+      <h2 class="h2">Deine persönlichen Einladungen</h2>
+      <p>Jeder Link funktioniert genau einmal und ist eine Stunde gültig. Bitte nicht weitergeben.</p>
+      <p class="actions">{% for l in links %}<a class="btn" href="{{ l.url }}" rel="noopener noreferrer" target="_blank">{{ icon('telegram') }} {{ l.label }} öffnen</a> {% endfor %}</p>
+    {% else %}
+      {% if error %}<p class="notice notice-warn">{{ error }}</p>{% endif %}
+      <h2 class="h2">Du bist im Kreis. Komm rein.</h2>
+      <p>Hol dir deinen persönlichen Einladungslink für Gruppe und Kanal. Dein Zugang hängt an deinem Telegram-Kreis.</p>
+      <form method="post" action="/app/community/einladung">{{ csrf() }}<button class="btn btn-big" type="submit">{{ icon('telegram') }} Einladung erstellen</button></form>
+    {% endif %}
   {% else %}
-    {% if error %}<p class="notice notice-warn">{{ error }}</p>{% endif %}
-    <h2 class="h3">Beitreten</h2>
-    <p>Erstelle deinen persönlichen Einladungslink. Dein Zugang ist an deine Mitgliedschaft gekoppelt.</p>
-    <form method="post" action="/app/community/einladung">{{ csrf() }}<button class="btn" type="submit">Einladung erstellen</button></form>
+    <h2 class="h2">Hol dir Männer an deine Seite, die mitziehen.</h2>
+    <ul class="ticks">
+      <li>{{ icon('check') }} Gruppe mit allen Mitgliedern, sortiert nach Themen</li>
+      <li>{{ icon('check') }} Kanal mit Zusatzinhalten der Lehrer</li>
+      <li>{{ icon('check') }} Wochenziel am Montag, Ergebnis am Freitag</li>
+    </ul>
+    <p class="price price-inline"><span class="price-plus">+</span><span class="price-num">{{ telegramPriceLabel }}</span><span class="price-cur">€</span> <span class="muted">pro Monat zu deiner Mitgliedschaft</span></p>
+    {% if bookError %}<p class="notice notice-warn">{{ bookError }}</p>{% endif %}
+    {% if canBook %}
+      <form method="post" action="/app/community/telegram" class="stack narrow-form">
+        {{ csrf() }}
+        <label class="check"><input type="checkbox" name="waiver" required> <span>Ich verlange ausdrücklich, dass der Zugang sofort beginnt. Mir ist bekannt, dass mein Widerrufsrecht damit erlischt. Abrechnung anteilig mit meiner Mitgliedschaft.</span></label>
+        <button class="btn btn-big" type="submit">Telegram-Kreis zahlungspflichtig dazubuchen</button>
+        <p class="small muted">Jederzeit wieder abbestellbar unter „Konto &amp; Abo“.{% if paymentMock %} Testmodus: Es wird kein echtes Geld abgebucht.{% endif %}</p>
+      </form>
+    {% elif telegramAddon %}
+      <p class="muted">Den Telegram-Kreis kannst du zu einer laufenden Mitgliedschaft dazubuchen.</p>
+    {% else %}
+      <p class="muted">Der Telegram-Kreis startet in Kürze. Wir sagen dir Bescheid.</p>
+    {% endif %}
   {% endif %}
 </section>
+
 <section class="cards cards-2">
-  <article class="card cut"><p class="eyebrow">Montag</p><h2 class="h4">Wochenziel posten</h2><p>Ein Satz reicht: Was erledigst du diese Woche?</p></article>
-  <article class="card cut"><p class="eyebrow">Freitag</p><h2 class="h4">Ergebnis teilen</h2><p>Geschafft oder nicht: ehrlich berichten, daraus lernen.</p></article>
+  <article class="card cut" data-reveal><span class="subject-icon">{{ icon('bolt') }}</span><h2 class="h4">Montag: Wochenziel posten</h2><p>Ein Satz reicht. Was erledigst du diese Woche?</p></article>
+  <article class="card cut" data-reveal><span class="subject-icon">{{ icon('flame') }}</span><h2 class="h4">Freitag: Ergebnis teilen</h2><p>Geschafft oder nicht: ehrlich berichten und daraus lernen.</p></article>
 </section>
 {% endblock %}

@@ -5,6 +5,7 @@ const { nowIso } = require('../db');
 
 const STRIPE_VERSION = '2024-06-20';
 const SIGNATURE_TOLERANCE_S = 300;
+const ACCESS = new Set(['active', 'trialing', 'past_due']);
 
 function formEncode(obj, prefix = '', out = []) {
   for (const [key, value] of Object.entries(obj)) {
@@ -35,6 +36,8 @@ function verifyStripeSignature(rawBody, header, secret, now = Date.now()) {
 function createPayments({ db, cfg, logger = console, onAccessChange = () => {} }) {
   const p = cfg.payment;
   const isMock = p.provider === 'mock';
+  // Telegram-Zusatz: im Testmodus immer, mit Stripe nur mit eigenem Preis.
+  const telegramAddonPossible = isMock || Boolean(p.stripeTelegramPriceId);
 
   async function stripe(method, path, body) {
     const res = await fetch(`${p.stripeApiBase}/v1${path}`, {
@@ -60,21 +63,22 @@ function createPayments({ db, cfg, logger = console, onAccessChange = () => {} }
   function upsert(userId, fields) {
     const existing = db.get('SELECT * FROM subscriptions WHERE user_id = ?', userId);
     const before = existing ? existing.status : null;
+    const addonBefore = existing ? Boolean(existing.telegram_addon) : false;
     const row = { ...(existing || {}), ...fields, user_id: userId, updated_at: nowIso() };
     db.run(
-      `INSERT INTO subscriptions (user_id, provider, customer_id, subscription_id, status, current_period_end, cancel_at_period_end, started_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO subscriptions (user_id, provider, customer_id, subscription_id, status, current_period_end, cancel_at_period_end, telegram_addon, started_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(user_id) DO UPDATE SET provider = excluded.provider, customer_id = excluded.customer_id,
          subscription_id = excluded.subscription_id, status = excluded.status, current_period_end = excluded.current_period_end,
-         cancel_at_period_end = excluded.cancel_at_period_end, started_at = COALESCE(subscriptions.started_at, excluded.started_at),
-         updated_at = excluded.updated_at`,
+         cancel_at_period_end = excluded.cancel_at_period_end, telegram_addon = excluded.telegram_addon,
+         started_at = COALESCE(subscriptions.started_at, excluded.started_at), updated_at = excluded.updated_at`,
       userId, row.provider || p.provider, row.customer_id || null, row.subscription_id || null, row.status || 'incomplete',
-      row.current_period_end || null, row.cancel_at_period_end ? 1 : 0, row.started_at || nowIso(), row.updated_at,
+      row.current_period_end || null, row.cancel_at_period_end ? 1 : 0, row.telegram_addon ? 1 : 0, row.started_at || nowIso(), row.updated_at,
     );
-    if (before !== row.status) {
-      db.audit(userId, 'subscription.status', `${before || '-'} -> ${row.status}`);
-      onAccessChange(userId);
-    }
+    const addonChanged = addonBefore !== Boolean(row.telegram_addon);
+    if (before !== row.status) db.audit(userId, 'subscription.status', `${before || '-'} -> ${row.status}`);
+    if (addonChanged) db.audit(userId, 'subscription.telegram', row.telegram_addon ? 'an' : 'aus');
+    if (before !== row.status || addonChanged) onAccessChange(userId);
   }
 
   function fromStripeSubscription(sub) {
@@ -86,13 +90,20 @@ function createPayments({ db, cfg, logger = console, onAccessChange = () => {} }
       status: String(sub.status || 'incomplete'),
       current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
       cancel_at_period_end: Boolean(sub.cancel_at_period_end),
+      telegram_addon: Boolean(telegramItem(sub)),
     };
+  }
+
+  function telegramItem(sub) {
+    if (!p.stripeTelegramPriceId) return null;
+    return (sub.items?.data || []).find((item) => item.price?.id === p.stripeTelegramPriceId) || null;
   }
 
   /* ---------- Checkout ---------- */
 
-  async function createCheckout(user) {
-    if (isMock) return `${cfg.appUrl}/mitgliedschaft/testzahlung`;
+  async function createCheckout(user, { telegram = false } = {}) {
+    const withTelegram = telegram && telegramAddonPossible;
+    if (isMock) return `${cfg.appUrl}/mitgliedschaft/testzahlung${withTelegram ? '?telegram=1' : ''}`;
     const existing = db.get('SELECT customer_id FROM subscriptions WHERE user_id = ?', user.id);
     let customerId = existing?.customer_id;
     if (!customerId) {
@@ -104,9 +115,12 @@ function createPayments({ db, cfg, logger = console, onAccessChange = () => {} }
       mode: 'subscription',
       customer: customerId,
       client_reference_id: String(user.id),
-      line_items: { 0: { price: p.stripePriceId, quantity: 1 } },
+      line_items: {
+        0: { price: p.stripePriceId, quantity: 1 },
+        ...(withTelegram ? { 1: { price: p.stripeTelegramPriceId, quantity: 1 } } : {}),
+      },
       success_url: `${cfg.appUrl}/mitgliedschaft/danke`,
-      cancel_url: `${cfg.appUrl}/mitgliedschaft?abgebrochen=1`,
+      cancel_url: `${cfg.appUrl}/app/freischalten?abgebrochen=1`,
       locale: 'de',
       allow_promotion_codes: 'true',
       billing_address_collection: 'required',
@@ -116,9 +130,10 @@ function createPayments({ db, cfg, logger = console, onAccessChange = () => {} }
   }
 
   /** Nur im Testmodus: schaltet ein 30-Tage-Abo frei, ohne echtes Geld. */
-  function activateMock(userId) {
+  function activateMock(userId, { telegram = false } = {}) {
     if (!isMock) throw new Error('Testzahlung ist nur im Testmodus erlaubt.');
     upsert(userId, {
+      telegram_addon: Boolean(telegram),
       provider: 'mock',
       customer_id: `mock_cus_${userId}`,
       subscription_id: `mock_sub_${userId}`,
@@ -140,6 +155,28 @@ function createPayments({ db, cfg, logger = console, onAccessChange = () => {} }
       upsert(userId, { cancel_at_period_end: cancel });
     }
     db.audit(userId, cancel ? 'subscription.cancel' : 'subscription.resume');
+    return true;
+  }
+
+  /* ---------- Telegram-Zusatz ---------- */
+
+  /** Bucht den Telegram-Kreis zum laufenden Abo dazu oder beendet ihn (anteilig verrechnet). */
+  async function setTelegramAddon(userId, on) {
+    const sub = db.get('SELECT * FROM subscriptions WHERE user_id = ?', userId);
+    if (!telegramAddonPossible || !sub || !sub.subscription_id || !ACCESS.has(sub.status)) return false;
+    if (Boolean(sub.telegram_addon) === Boolean(on)) return true;
+    if (sub.provider === 'stripe') {
+      const current = await stripe('GET', `/subscriptions/${encodeURIComponent(sub.subscription_id)}`);
+      const item = telegramItem(current);
+      if (on && !item) {
+        await stripe('POST', '/subscription_items', { subscription: sub.subscription_id, price: p.stripeTelegramPriceId, quantity: 1, proration_behavior: 'create_prorations' });
+      } else if (!on && item) {
+        await stripe('DELETE', `/subscription_items/${encodeURIComponent(item.id)}?proration_behavior=create_prorations`);
+      }
+      upsert(userId, fromStripeSubscription(await stripe('GET', `/subscriptions/${encodeURIComponent(sub.subscription_id)}`)));
+    } else {
+      upsert(userId, { telegram_addon: Boolean(on) });
+    }
     return true;
   }
 
@@ -194,7 +231,7 @@ function createPayments({ db, cfg, logger = console, onAccessChange = () => {} }
     return { status: 200, message: 'ok' };
   }
 
-  return { isMock, createCheckout, activateMock, setCancelAtPeriodEnd, cancelImmediately, portalUrl, handleStripeEvent };
+  return { isMock, telegramAddonPossible, setTelegramAddon, createCheckout, activateMock, setCancelAtPeriodEnd, cancelImmediately, portalUrl, handleStripeEvent };
 }
 
 module.exports = { createPayments, verifyStripeSignature, formEncode };

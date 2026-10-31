@@ -37,6 +37,8 @@ test('Seminare öffnen sich nur in Reihenfolge und nur nach ganzem Video + Aufga
 
   let res = await c.get('/app/seminare');
   assert.equal(res.status, 200);
+  res = await c.get('/app/lehrgaenge/persoenlichkeit');
+  assert.equal(res.status, 200);
   assert.match(res.text, /Gesperrt · öffnet nach Seminar 1/);
 
   // Seminar 2 ist gesperrt – Seite, Video und Aufgabe
@@ -214,10 +216,10 @@ test('Warteliste mit Double-Opt-in', async (t) => {
   const app = await startApp();
   t.after(() => app.stop());
   const c = new Client(app.base);
-  await c.get('/faecher/fitness');
-  let res = await c.post('/warteliste', { email: 'neu@example.de', fach: 'fitness' });
+  await c.get('/faecher/auftreten');
+  let res = await c.post('/warteliste', { email: 'neu@example.de', fach: 'auftreten' });
   assert.equal(res.status, 422, 'ohne Einwilligung');
-  res = await c.post('/warteliste', { email: 'neu@example.de', fach: 'fitness', consent: 'on' });
+  res = await c.post('/warteliste', { email: 'neu@example.de', fach: 'auftreten', consent: 'on' });
   assert.match(res.text, /Ein Klick noch/);
   assert.equal(app.db.get('SELECT confirmed_at FROM waitlist').confirmed_at, null);
   const link = /\/warteliste\/bestaetigen\/[\w-]+/.exec(app.mailer.outbox.at(-1).text)[0];
@@ -265,6 +267,7 @@ test('Stripe: Checkout, signierter Webhook, Idempotenz, Kündigung', async (t) =
   await new Promise((r) => fake.listen(0, '127.0.0.1', r));
   const app = await startApp({
     PAYMENT_PROVIDER: 'stripe', STRIPE_SECRET_KEY: 'sk_test_x', STRIPE_WEBHOOK_SECRET: 'whsec_x', STRIPE_PRICE_ID: 'price_1',
+    STRIPE_TELEGRAM_PRICE_ID: 'price_tg', TELEGRAM_BOT_TOKEN: 'bot', TELEGRAM_GROUP_ID: '-100',
     STRIPE_API_BASE: `http://127.0.0.1:${fake.address().port}`,
   });
   t.after(async () => { await app.stop(); fake.close(); });
@@ -274,10 +277,11 @@ test('Stripe: Checkout, signierter Webhook, Idempotenz, Kündigung', async (t) =
 
   const c = await signup(app);
   await c.get('/mitgliedschaft');
-  let res = await c.post('/mitgliedschaft/checkout', { agb: 'on', waiver: 'on' });
+  let res = await c.post('/mitgliedschaft/checkout', { agb: 'on', waiver: 'on', telegram: 'on' });
   assert.equal(res.location, 'https://checkout.stripe.com/c/pay/cs_1');
   assert.equal(calls[0].auth, 'Bearer sk_test_x');
   assert.match(calls[1].body, /client_reference_id=1/);
+  assert.match(calls[1].body, /line_items%5B1%5D%5Bprice%5D=price_tg/, 'Telegram-Kreis als zweite Position');
   assert.equal((await c.get('/mitgliedschaft/testzahlung')).status, 404, 'Testzahlung im Stripe-Modus aus');
 
   const send = async (event, secret = 'whsec_x') => {
@@ -305,4 +309,48 @@ test('Stripe: Checkout, signierter Webhook, Idempotenz, Kündigung', async (t) =
   await send({ id: 'evt_2', type: 'customer.subscription.deleted', data: { object: { ...sub, status: 'canceled' } } });
   assert.equal(app.db.get('SELECT status FROM subscriptions').status, 'canceled');
   assert.equal((await c.get('/app/seminare')).status, 303);
+});
+
+test('Kostenlos registriert: Paywall statt Inhalte, Preise erst nach Login', async (t) => {
+  const app = await startApp();
+  t.after(() => app.stop());
+  const guest = new Client(app.base);
+  assert.equal((await guest.get('/mitgliedschaft')).location, '/registrieren');
+  assert.doesNotMatch((await guest.get('/')).text, /39 €/, 'keine Preise auf der öffentlichen Seite');
+
+  const c = await signup(app);
+  assert.equal((await c.get('/mitgliedschaft')).location, '/app/freischalten');
+  const res = await c.get('/app');
+  assert.match(res.text, /Zahlungspflichtig bestellen/);
+  assert.match(res.text, /Fitness &amp; Körper/);
+  assert.equal((await c.get('/app/lehrgaenge')).status, 303);
+  assert.equal((await c.get('/app/community')).status, 303);
+});
+
+test('Telegram-Kreis: beim Kauf oder später dazubuchen, beenden', async (t) => {
+  const app = await startApp();
+  t.after(() => app.stop());
+  const c = await signup(app);
+  await c.get('/app');
+  let res = await c.post('/mitgliedschaft/checkout', { agb: 'on', waiver: 'on', telegram: 'on' });
+  assert.match(res.location, /testzahlung\?telegram=1/);
+  await c.get('/mitgliedschaft/testzahlung?telegram=1');
+  await c.post('/mitgliedschaft/testzahlung', { telegram: '1' });
+  const uid = app.db.get("SELECT id FROM users WHERE email = 'max@example.de'").id;
+  assert.equal(app.db.get('SELECT telegram_addon FROM subscriptions WHERE user_id = ?', uid).telegram_addon, 1);
+  assert.equal(app.ctx.learning.hasTelegram({ id: uid, role: 'member' }), true);
+
+  await c.get('/app/konto');
+  res = await c.post('/app/konto/telegram/beenden');
+  assert.match(res.location, /telegram-beendet/);
+  assert.equal(app.ctx.learning.hasTelegram({ id: uid, role: 'member' }), false);
+
+  res = await c.get('/app/community');
+  assert.match(res.text, /dazubuchen/);
+  res = await c.post('/app/community/telegram', {});
+  assert.equal(res.status, 422, 'ohne Zustimmung kein Kauf');
+  res = await c.post('/app/community/telegram', { waiver: 'on' });
+  assert.match(res.location, /telegram-gebucht/);
+  assert.equal(app.ctx.learning.hasTelegram({ id: uid, role: 'member' }), true);
+  assert.match(app.db.get("SELECT detail FROM audit_log WHERE action = 'subscription.telegram' ORDER BY id DESC").detail, /an/);
 });

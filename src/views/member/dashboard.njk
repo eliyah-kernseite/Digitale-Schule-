@@ -1,84 +1,91 @@
 {% extends "layout/app.njk" %}
 {% from "partials/macros.njk" import progress, csrf with context %}
+{% from "partials/icons.njk" import icon %}
 {% block app %}
 <header class="app-head">
-  <h1 class="h1">Willkommen zurück, {{ user.firstName }}.</h1>
-  <p class="quote-line">{{ quote }}</p>
+  <h1 class="mega" data-reveal>Willkommen zurück, {{ user.firstName }}.</h1>
+  <p class="quote-line" data-reveal>„{{ quote }}“</p>
 </header>
 
-{% if not access %}
-  <section class="panel cut">
-    <h2 class="h3">Starte deine Mitgliedschaft</h2>
-    {% if sub and sub.status == 'canceled' %}
-      <p>Deine Mitgliedschaft ist beendet. Deine Fortschritte sind gespeichert. Wenn du zurückkommst, machst du genau dort weiter, wo du aufgehört hast.</p>
-    {% else %}
-      <p>Dein Konto steht. Mit der Mitgliedschaft schaltest du die Seminare, dein Zeugnis und die Community frei.</p>
-    {% endif %}
-    <a class="btn" href="/mitgliedschaft">Mitgliedschaft ansehen</a>
-  </section>
-{% else %}
-  {% if not tests.week0 %}
-  <section class="panel panel-accent cut">
-    <h2 class="h3">Dein erster Schritt: der Selbsttest</h2>
-    <p>Zwei Minuten, fünf Fragen. Das ist dein Ausgangspunkt für das Zeugnis in Woche 12.</p>
-    <a class="btn btn-dark" href="/app/zeugnis#selbsttest">Selbsttest machen</a>
-  </section>
-  {% elif tests.week12Open %}
-  <section class="panel panel-accent cut">
-    <h2 class="h3">Woche 12 ist da.</h2>
-    <p>Zeit für den zweiten Selbsttest. Danach siehst du schwarz auf weiß, wie weit du gekommen bist.</p>
-    <a class="btn btn-dark" href="/app/zeugnis#selbsttest">Zweiten Selbsttest machen</a>
-  </section>
-  {% endif %}
+{% if not tests.week0 %}
+<section class="panel panel-accent cut" data-reveal>
+  <h2 class="h3">Dein erster Schritt: der Selbsttest</h2>
+  <p>Zwei Minuten, fünf Fragen. Das ist dein Startpunkt für das Zeugnis in Woche zwölf.</p>
+  <a class="btn btn-dark" href="/app/zeugnis#selbsttest">Selbsttest machen</a>
+</section>
+{% elif tests.week12Open %}
+<section class="panel panel-accent cut" data-reveal>
+  <h2 class="h3">Woche zwölf ist da.</h2>
+  <p>Zeit für den zweiten Selbsttest. Danach siehst du schwarz auf weiß, wie weit du gekommen bist.</p>
+  <a class="btn btn-dark" href="/app/zeugnis#selbsttest">Zweiten Selbsttest machen</a>
+</section>
+{% endif %}
 
-  {% for c in courses %}
-  <section class="course-summary">
-    <p class="eyebrow">{{ c.subject.level_title }} · {{ c.subject.title }}</p>
-    {{ progress(c.done, c.total, 'Dein Fortschritt') }}
-    <div class="dash-grid">
-      <article class="panel cut">
-        {% if c.finished %}
-          <p class="eyebrow">Grundstufe abgeschlossen</p>
-          <h2 class="h3">Stark. Alle {{ c.total }} Seminare geschafft.</h2>
-          <p>Schau dir dein Zeugnis an und bewerte die Schule, wenn du magst.</p>
-          <a class="btn" href="/app/zeugnis">Zum Zeugnis</a>
-        {% elif c.next %}
-          <p class="eyebrow">Nächstes Seminar</p>
-          <h2 class="h3">{{ c.next.number }} · {{ c.next.title }}</h2>
-          {% if lastTask and loop.first %}
-            <p class="muted small">Deine Aufgabe aus Seminar {{ lastTask.seminar.number }}:</p>
-            <blockquote class="task-echo">{{ lastTask.content | truncate(180) }}</blockquote>
-          {% else %}
-            <p>{{ c.next.summary }}</p>
-          {% endif %}
-          {% if c.next.watchedPercent > 0 %}<p class="small muted">{{ c.next.watchedPercent }} % angesehen{% if c.next.videoDone %}, Aufgabe offen{% endif %}</p>{% endif %}
-          <a class="btn" href="/app/seminare/{{ c.next.id }}">{{ 'Aufgabe erledigen' if c.next.videoDone else ('Weiterschauen' if c.next.watchedPercent > 0 else 'Seminar starten') }}</a>
-        {% else %}
-          <p>Die ersten Seminare werden gerade vorbereitet. Wir melden uns, sobald es losgeht.</p>
-        {% endif %}
-      </article>
-      {% if loop.first %}
-      <article class="panel cut">
-        <p class="eyebrow">Deine Routine</p>
-        <p class="streak"><strong>{{ streak.current }}</strong> {{ 'Tag' if streak.current == 1 else 'Tage' }} Streak</p>
-        {% include "partials/streak-dots.njk" %}
-        {% if streak.checkedToday %}
-          <p class="small">Heute erledigt. Morgen wieder.</p>
-        {% else %}
-          <form method="post" action="/app/zeugnis/routine">{{ csrf() }}<input type="hidden" name="back" value="/app"><button class="btn btn-small" type="submit">Heute erledigt</button></form>
-        {% endif %}
-        <p class="small muted">Wochenziel: montags in Telegram posten.</p>
-      </article>
+<div class="dash-top">
+  <article class="continue cut" data-reveal data-glow>
+    {% if current and current.next %}
+      <p class="continue-kicker">{{ icon(current.subject.slug) }} {{ current.subject.title }}</p>
+      <h2 class="h1">{{ current.next.title }}</h2>
+      {% if lastTask %}
+        <p class="muted small">Deine letzte Aufgabe:</p>
+        <blockquote class="task-echo">{{ lastTask.content | truncate(160) }}</blockquote>
+      {% else %}
+        <p class="lead">{{ current.next.summary }}</p>
       {% endif %}
-    </div>
-  </section>
-  {% endfor %}
+      {{ progress(current.done, current.total, 'Dein Fortschritt') }}
+      <a class="btn btn-big" href="/app/seminare/{{ current.next.id }}">{{ icon('play') }} {{ 'Aufgabe erledigen' if current.next.videoDone else ('Weiterschauen' if current.next.watchedPercent > 0 else 'Seminar starten') }}</a>
+    {% elif current and current.finished %}
+      <p class="continue-kicker">{{ icon('check') }} {{ current.subject.title }}</p>
+      <h2 class="h1">Alle {{ current.total }} Seminare geschafft.</h2>
+      <p class="lead">Stark. Schau dir dein Zeugnis an oder starte den nächsten Lehrgang.</p>
+      <a class="btn btn-big" href="/app/zeugnis">Zum Zeugnis</a>
+    {% else %}
+      <h2 class="h2">Die ersten Seminare werden gerade vorbereitet.</h2>
+      <p>Wir sagen dir Bescheid, sobald es losgeht.</p>
+    {% endif %}
+  </article>
 
-  {% if goal %}
-  <section class="goal-line">
-    <p class="eyebrow">Dein Ziel</p>
-    <p class="h4">{{ goal.text }}</p>
-  </section>
-  {% endif %}
+  <aside class="streak-card cut" data-reveal>
+    <p class="streak">{{ icon('flame') }}<strong data-count="{{ streak.current }}">{{ streak.current }}</strong> {{ 'Tag' if streak.current == 1 else 'Tage' }}</p>
+    <p class="small muted">Routine am Stück · Rekord {{ streak.best }}</p>
+    {% include "partials/streak-dots.njk" %}
+    {% if streak.checkedToday %}
+      <p class="small">Heute erledigt. Morgen wieder.</p>
+    {% else %}
+      <form method="post" action="/app/zeugnis/routine">{{ csrf() }}<input type="hidden" name="back" value="/app"><button class="btn btn-small" type="submit">{{ icon('check') }} Heute erledigt</button></form>
+    {% endif %}
+  </aside>
+</div>
+
+{% if goal %}
+<section class="goal-line" data-reveal>
+  <p class="muted small">Dein Ziel</p>
+  <p class="h3">{{ goal.text }}</p>
+</section>
+{% endif %}
+
+<section class="dash-courses">
+  <div class="row-head">
+    <h2 class="h2">Deine Lehrgänge</h2>
+    <a class="link-arrow" href="/app/lehrgaenge">Alle ansehen</a>
+  </div>
+  <div class="course-grid">
+    {% for c in courses %}
+    <a class="course-card" href="/app/lehrgaenge/{{ c.subject.slug }}" data-reveal data-glow>
+      <span class="subject-icon">{{ icon(c.subject.slug) }}</span>
+      <strong>{{ c.subject.title }}</strong>
+      <span class="small muted">{% if c.total %}{{ c.done }} von {{ c.total }} Seminaren{% else %}in Vorbereitung{% endif %}</span>
+      <svg class="mini-bar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><rect class="track" width="100" height="4"/><rect class="fill" width="{{ (c.done / c.total * 100) if c.total else 0 }}" height="4"/></svg>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% if not hasTelegram %}
+<section class="tg-strip cut" data-reveal>
+  <span class="tg-badge">{{ icon('telegram') }} Telegram-Kreis</span>
+  <p>Wochenziele, Ergebnisse und Zusatzinhalte der Lehrer. Gemeinsam ziehst du länger durch.</p>
+  <a class="btn btn-small" href="/app/community">Ansehen</a>
+</section>
 {% endif %}
 {% endblock %}

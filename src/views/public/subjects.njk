@@ -1,22 +1,29 @@
 {% extends "layout/base.njk" %}
+{% from "partials/icons.njk" import icon %}
 {% block main %}
 <section class="page-head">
   <div class="wrap">
-    <p class="eyebrow">Fächer</p>
-    <h1 class="h1">Drei Fächer. Ein Ziel.</h1>
-    <p class="lead">Jedes Fach hat einen eigenen Lehrer, einen festen Lehrplan und Aufgaben, die dich wirklich weiterbringen. Mit der Mitgliedschaft bekommst du alle Fächer, sobald sie starten.</p>
+    <h1 class="mega" data-reveal>Wähle, woran du arbeitest.</h1>
+    <p class="lead" data-reveal>{{ liveCount }} Lehrgänge sind live, weitere kommen dazu. Mit einer Mitgliedschaft bekommst du alle, auch die, die erst noch starten.</p>
   </div>
 </section>
 <section class="section">
-  <div class="wrap cards cards-3">
+  <div class="wrap subject-grid subject-grid-wide">
     {% for s in subjects %}
-    <article class="card cut {% if s.status == 'live' %}card-live{% endif %}">
-      <p class="chip {% if s.status == 'live' %}chip-live{% endif %}">{{ 'Jetzt verfügbar' if s.status == 'live' else 'Bald verfügbar' }}</p>
+    <a class="subject-card {% if s.status != 'live' %}is-soon{% endif %}" href="/faecher/{{ s.slug }}" data-reveal data-glow>
+      <span class="subject-icon">{{ icon(s.slug) }}</span>
+      <span class="subject-meta">{% if s.status == 'live' %}{{ s.count }} Seminare · {{ s.level_title }}{% else %}Bald verfügbar{% endif %}</span>
       <h2 class="h3">{{ s.title }}</h2>
       <p>{{ s.description }}</p>
-      <a class="link-arrow" href="/faecher/{{ s.slug }}">{{ 'Lehrplan und Lehrer' if s.status == 'live' else 'Auf die Warteliste' }}</a>
-    </article>
+      <span class="subject-go">{{ 'Lehrplan ansehen' if s.status == 'live' else 'Auf die Warteliste' }} {{ icon('arrow') }}</span>
+    </a>
     {% endfor %}
+  </div>
+</section>
+<section class="final-cta">
+  <div class="wrap">
+    <p class="mega final-line" data-reveal>Ein Konto. Alle Lehrgänge im Blick.</p>
+    <div class="actions" data-reveal><a class="btn btn-dark btn-big" href="/registrieren">Kostenlos starten {{ icon('arrow') }}</a></div>
   </div>
 </section>
 {% endblock %}

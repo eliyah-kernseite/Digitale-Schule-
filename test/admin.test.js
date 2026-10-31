@@ -17,13 +17,13 @@ test('Admin: Seminar anlegen, Video hochladen, veröffentlichen', async (t) => {
   const c = await admin(app);
   const subject = app.db.get("SELECT id FROM subjects WHERE slug = 'fitness'");
   await c.get('/admin/seminare/neu?fach=' + subject.id);
-  let res = await c.post('/admin/seminare', { subject_id: String(subject.id), position: '4', block_title: 'Aufbau', title: 'Schlaf als Training', summary: '', task_type: 'text', task_prompt: 'Schreibe deine Schlafzeiten auf.', chapters: '00:00 Start\n00:10 Praxis' });
+  let res = await c.post('/admin/seminare', { subject_id: String(subject.id), position: '9', block_title: 'Aufbau', title: 'Schlaf als Training', summary: '', task_type: 'text', task_prompt: 'Schreibe deine Schlafzeiten auf.', chapters: '00:00 Start\n00:10 Praxis' });
   assert.equal(res.status, 303);
   const id = Number(/\/admin\/seminare\/(\d+)/.exec(res.location)[1]);
 
   // ohne Video nicht veröffentlichbar
   await c.get(`/admin/seminare/${id}`);
-  res = await c.post(`/admin/seminare/${id}`, { position: '4', block_title: 'Aufbau', title: 'Schlaf als Training', task_type: 'text', task_prompt: 'Schreibe deine Schlafzeiten auf.', published: 'on' });
+  res = await c.post(`/admin/seminare/${id}`, { position: '9', block_title: 'Aufbau', title: 'Schlaf als Training', task_type: 'text', task_prompt: 'Schreibe deine Schlafzeiten auf.', published: 'on' });
   assert.match(res.location, /veroeffentlichen-video/);
   assert.equal(app.db.get('SELECT published FROM seminars WHERE id = ?', id).published, 0);
 
@@ -46,7 +46,7 @@ test('Admin: Seminar anlegen, Video hochladen, veröffentlichen', async (t) => {
   assert.ok(fs.existsSync(`${app.cfg.videoDir}/${row.video_file}`));
   assert.deepEqual(fs.readdirSync(app.cfg.videoDir).filter((f) => f.endsWith('.tmp')), []);
 
-  res = await c.post(`/admin/seminare/${id}`, { position: '4', block_title: 'Aufbau', title: 'Schlaf als Training', task_type: 'text', task_prompt: 'Schreibe deine Schlafzeiten auf.', video_duration: '20', published: 'on' });
+  res = await c.post(`/admin/seminare/${id}`, { position: '9', block_title: 'Aufbau', title: 'Schlaf als Training', task_type: 'text', task_prompt: 'Schreibe deine Schlafzeiten auf.', video_duration: '20', published: 'on' });
   assert.match(res.location, /gespeichert/);
   assert.equal(app.db.get('SELECT published FROM seminars WHERE id = ?', id).published, 1);
 });

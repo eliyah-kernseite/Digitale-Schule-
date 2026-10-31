@@ -31,11 +31,11 @@ function createApp(cfg, { logger = console, db: injectedDb } = {}) {
   const learning = createLearning(db);
 
   const userById = (id) => db.get('SELECT id, role, comp_access_until FROM users WHERE id = ?', id);
-  const hasAccessById = (id) => {
+  const hasTelegramById = (id) => {
     const u = userById(id);
-    return u ? learning.hasAccess({ id: u.id, role: u.role, compAccessUntil: u.comp_access_until }) : false;
+    return u ? learning.hasTelegram({ id: u.id, role: u.role, compAccessUntil: u.comp_access_until }) : false;
   };
-  const telegram = createTelegram({ db, cfg, logger, hasAccessById });
+  const telegram = createTelegram({ db, cfg, logger, hasTelegramById });
   const payments = createPayments({ db, cfg, logger, onAccessChange: (id) => telegram.onAccessChange(id) });
 
   const ctx = { cfg, db, logger, limiter, limit: (...a) => limit(limiter, ...a), sessions, csrf, mailer, tokens, learning, payments, telegram };
@@ -57,6 +57,10 @@ function createApp(cfg, { logger = console, db: injectedDb } = {}) {
   env.addGlobal('priceLabel', cfg.priceLabel);
   env.addGlobal('priceNote', cfg.priceNote);
   env.addGlobal('paymentMock', payments.isMock);
+  env.addGlobal('telegramPriceLabel', cfg.telegramPriceLabel);
+  // Den Zusatz nur anbieten, wenn er auch funktioniert (oder im Testmodus).
+  ctx.telegramAddon = payments.telegramAddonPossible && (telegram.enabled || payments.isMock);
+  env.addGlobal('telegramAddon', ctx.telegramAddon);
   env.addGlobal('assetVersion', String(Date.now()).slice(-6));
   app.set('view engine', 'njk');
 

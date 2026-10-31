@@ -31,7 +31,8 @@ test('Registrierung, Bestätigung, Login, Logout', async (t) => {
   assert.equal(res.location, '/app');
   res = await c.get('/app');
   assert.equal(res.status, 200);
-  assert.match(res.text, /Willkommen zurück, Max/);
+  assert.match(res.text, /Willkommen, Max/);
+  assert.match(res.text, /Zahlungspflichtig bestellen/, 'ohne Abo landet man direkt in der Paywall');
 
   res = await c.post('/logout');
   assert.equal(res.status, 303);
