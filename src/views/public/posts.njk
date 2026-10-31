@@ -1,0 +1,24 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<section class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Beiträge</p>
+    <h1 class="h1">Gedanken für unterwegs.</h1>
+    <p class="lead">Kurze Texte aus dem Unterricht, frei zugänglich. Lies einen, setz einen Gedanken um.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap posts">
+    {% for p in posts %}
+    <article class="post-teaser">
+      <p class="small muted">{{ p.published_at | date }}</p>
+      <h2 class="h3"><a href="/beitraege/{{ p.slug }}">{{ p.title }}</a></h2>
+      <p>{{ p.excerpt }}</p>
+      <a class="link-arrow" href="/beitraege/{{ p.slug }}">Weiterlesen</a>
+    </article>
+    {% else %}
+    <p>Bald gibt es hier die ersten Beiträge.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

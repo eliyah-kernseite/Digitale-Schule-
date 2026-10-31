@@ -1,0 +1,16 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<article class="section">
+  <div class="wrap narrow prose">
+    <p class="eyebrow"><a href="/beitraege">Beiträge</a> · {{ post.published_at | date }}</p>
+    <h1 class="h1">{{ post.title }}</h1>
+    {% if post.excerpt %}<p class="lead">{{ post.excerpt }}</p>{% endif %}
+    {% for para in post.body | paragraphs %}<p>{{ para }}</p>{% endfor %}
+    <aside class="panel cut">
+      <p class="h4">Willst du nicht nur lesen, sondern umsetzen?</p>
+      <p>In der Schule bekommst du zu jedem Thema ein Seminar und eine Aufgabe.</p>
+      <a class="btn" href="/so-funktionierts">So funktioniert’s</a>
+    </aside>
+  </div>
+</article>
+{% endblock %}

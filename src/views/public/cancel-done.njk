@@ -1,0 +1,19 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Kündigung eingegangen</p>
+    <h1 class="h1">Deine Kündigung ist bei uns.</h1>
+    <p class="lead">Eingegangen am {{ when }} Uhr. Eine Bestätigung ist an {{ form.email }} unterwegs. Du kannst diese Seite speichern oder ausdrucken.</p>
+    <dl class="summary panel cut">
+      <div><dt>Name</dt><dd>{{ form.name }}</dd></div>
+      <div><dt>E-Mail</dt><dd>{{ form.email }}</dd></div>
+      <div><dt>Art</dt><dd>{{ 'Ordentliche Kündigung' if form.kind == 'ordentlich' else 'Außerordentliche Kündigung' }}</dd></div>
+      <div><dt>Zeitpunkt</dt><dd>{{ form.wished_date | date if form.wished_date else 'nächstmöglicher Zeitpunkt' }}</dd></div>
+      {% if form.reason %}<div><dt>Grund</dt><dd>{{ form.reason }}</dd></div>{% endif %}
+    </dl>
+    <p>{{ endText }}</p>
+    <p class="muted">Danke, dass du ein Stück des Weges mit uns gegangen bist. Was du gelernt hast, nimmst du mit.</p>
+  </div>
+</section>
+{% endblock %}

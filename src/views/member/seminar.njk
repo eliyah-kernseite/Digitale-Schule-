@@ -1,0 +1,96 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf, ratingInput with context %}
+{% block app %}
+<header class="app-head">
+  <p class="eyebrow"><a href="/app/seminare">{{ seminar.subject_title }}</a> · {{ seminar.block_title }}</p>
+  <h1 class="h2">Seminar {{ seminar.number }} · {{ seminar.title }}</h1>
+  {% if seminar.preview %}<p class="notice notice-warn">Vorschau für Admins: Dieses Seminar ist noch nicht veröffentlicht.</p>{% endif %}
+</header>
+
+{% if justDone %}
+<section class="win cut" role="status">
+  <p class="eyebrow">Geschafft</p>
+  <p class="h3">Seminar {{ seminar.number }} ist erledigt.{% if next %} Seminar {{ next.number }} ist jetzt offen.{% endif %}</p>
+  {% if next %}<a class="btn btn-dark" href="/app/seminare/{{ next.id }}">Weiter zu „{{ next.title }}“</a>{% else %}<a class="btn btn-dark" href="/app/zeugnis">Zu deinem Zeugnis</a>{% endif %}
+</section>
+{% endif %}
+
+<div class="seminar-grid">
+  <section class="player-wrap">
+    {% if seminar.video_file %}
+    <div class="player" data-player
+         data-id="{{ seminar.id }}"
+         data-duration="{{ seminar.video_duration }}"
+         data-watched="{{ watched }}"
+         data-done="{{ 'true' if videoDone else 'false' }}"
+         data-csrf="{{ csrfToken }}">
+      <video preload="metadata" playsinline disablepictureinpicture controlslist="nodownload noplaybackrate" src="/app/seminare/{{ seminar.id }}/video"></video>
+      <div class="player-overlay" data-overlay><button type="button" class="player-big" data-play aria-label="Abspielen">▶</button></div>
+      <div class="player-bar">
+        <button type="button" class="player-btn" data-play aria-label="Abspielen / Pause">▶</button>
+        <div class="player-track" aria-hidden="true">
+          <span class="player-watched" data-watched-bar></span>
+          <span class="player-pos" data-pos-bar></span>
+        </div>
+        <span class="player-time" data-time>0:00 / {{ seminar.video_duration | duration }}</span>
+        <button type="button" class="player-btn" data-back aria-label="10 Sekunden zurück">↺ 10</button>
+        <button type="button" class="player-btn" data-fs aria-label="Vollbild">⤢</button>
+      </div>
+      <p class="player-hint small muted" data-hint>Vorspulen ist gesperrt. Bereits gesehene Stellen kannst du jederzeit wiederholen.</p>
+    </div>
+    {% if seminar.chapters.length %}
+    <ol class="chapters" data-chapters>
+      {% for c in seminar.chapters %}
+      <li><button type="button" data-seek="{{ c.t }}" {% if c.t > watched + 1 and not videoDone %}disabled{% endif %}><span>{{ c.t | duration }}</span> {{ c.title }}</button></li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+    <noscript><p class="notice notice-warn">Für das Videoseminar brauchst du JavaScript, damit dein Fortschritt gespeichert wird.</p></noscript>
+    {% else %}
+    <div class="player player-empty"><p>Das Video zu diesem Seminar folgt in Kürze.</p></div>
+    {% endif %}
+    {% if seminar.summary %}<p class="lead">{{ seminar.summary }}</p>{% endif %}
+  </section>
+
+  <aside class="task-panel cut" id="aufgabe">
+    <p class="eyebrow">Deine Aufgabe</p>
+    <p class="h4">{{ seminar.task_prompt }}</p>
+    {% if submission %}
+      <div class="task-done">
+        <p class="small muted">Abgegeben am {{ submission.submitted_at | date(true) }}</p>
+        <blockquote>{{ submission.content }}</blockquote>
+      </div>
+    {% elif not seminar.preview %}
+      <form method="post" action="/app/seminare/{{ seminar.id }}/aufgabe" class="stack" data-task-form>
+        {{ csrf() }}
+        {% if seminar.task_type == 'check' %}
+          <label class="check"><input type="checkbox" name="done" required {% if not videoDone %}disabled{% endif %}> <span>Erledigt</span></label>
+          <label>Notiz <span class="muted small">(optional)</span><textarea name="note" rows="3" maxlength="2000" {% if not videoDone %}disabled{% endif %}></textarea></label>
+        {% else %}
+          <label class="sr-only" for="answer">Deine Antwort</label>
+          <textarea id="answer" name="answer" rows="7" minlength="10" maxlength="5000" required placeholder="Schreib ehrlich. Das liest nur dein Lehrer." {% if not videoDone %}disabled{% endif %}></textarea>
+        {% endif %}
+        <button class="btn btn-block" type="submit" {% if not videoDone %}disabled{% endif %} data-task-submit>Aufgabe abgeben</button>
+        <p class="small muted" data-task-hint {% if videoDone %}hidden{% endif %}>Schau zuerst das ganze Seminar an. Dann kannst du abgeben.</p>
+      </form>
+    {% endif %}
+    {% if next %}
+      <p class="lock-note">{% if submission %}Weiter mit <a href="/app/seminare/{{ next.id }}">Seminar {{ next.number }}: {{ next.title }}</a>{% else %}Gesperrt: Seminar {{ next.number }} öffnet nach Abgabe.{% endif %}</p>
+    {% endif %}
+
+    {% if submission %}
+    <div class="rate" id="bewertung">
+      <p class="eyebrow">Wie hilfreich war das Seminar?</p>
+      <form method="post" action="/app/seminare/{{ seminar.id }}/bewertung" class="stack">
+        {{ csrf() }}
+        {{ ratingInput('rating', myReview.rating if myReview else 0) }}
+        <label class="sr-only" for="comment">Kommentar</label>
+        <textarea id="comment" name="comment" rows="2" maxlength="1000" placeholder="Was hat dir geholfen? Was fehlt? (optional)">{{ myReview.comment if myReview else '' }}</textarea>
+        <button class="btn btn-small" type="submit">{{ 'Bewertung ändern' if myReview else 'Bewerten' }}</button>
+      </form>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/js/player.js?v={{ assetVersion }}" defer></script>{% endblock %}

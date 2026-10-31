@@ -1,0 +1,47 @@
+{% extends "layout/base.njk" %}
+{% block bodyClass %}app-page{% endblock %}
+{% block header %}
+<header class="app-top">
+  <a class="logo" href="/app">{% include "partials/logo.njk" %}</a>
+  <form method="post" action="/logout" class="inline-form">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+    <button class="btn-link" type="submit">Abmelden</button>
+  </form>
+</header>
+{% endblock %}
+{% block notice %}{% endblock %}
+{% block main %}
+<div class="app-shell">
+  <nav class="app-nav" aria-label="Mitgliederbereich">
+    {% if adminNav %}
+      <a href="/admin" {% if path == '/admin' or path == '/admin/' %}aria-current="page"{% endif %}>Übersicht</a>
+      <a href="/admin/seminare" {% if path.startsWith('/admin/seminare') %}aria-current="page"{% endif %}>Seminare</a>
+      <a href="/admin/faecher" {% if path.startsWith('/admin/faecher') %}aria-current="page"{% endif %}>Fächer</a>
+      <a href="/admin/aufgaben" {% if path.startsWith('/admin/aufgaben') %}aria-current="page"{% endif %}>Aufgaben</a>
+      <a href="/admin/mitglieder" {% if path.startsWith('/admin/mitglieder') %}aria-current="page"{% endif %}>Mitglieder</a>
+      <a href="/admin/bewertungen" {% if path.startsWith('/admin/bewertungen') %}aria-current="page"{% endif %}>Bewertungen</a>
+      <a href="/admin/beitraege" {% if path.startsWith('/admin/beitraege') %}aria-current="page"{% endif %}>Beiträge</a>
+      <a href="/admin/warteliste" {% if path.startsWith('/admin/warteliste') %}aria-current="page"{% endif %}>Warteliste</a>
+      <a href="/admin/kuendigungen" {% if path.startsWith('/admin/kuendigungen') %}aria-current="page"{% endif %}>Kündigungen</a>
+      <a href="/admin/protokoll" {% if path.startsWith('/admin/protokoll') %}aria-current="page"{% endif %}>Protokoll</a>
+      <a href="/app" class="nav-sep">Zum Mitgliederbereich</a>
+    {% else %}
+      <a href="/app" {% if path == '/app' or path == '/app/' %}aria-current="page"{% endif %}>Übersicht</a>
+      <a href="/app/seminare" {% if path.startsWith('/app/seminare') %}aria-current="page"{% endif %}>Seminare</a>
+      <a href="/app/zeugnis" {% if path.startsWith('/app/zeugnis') %}aria-current="page"{% endif %}>Mein Zeugnis</a>
+      <a href="/app/community" {% if path.startsWith('/app/community') %}aria-current="page"{% endif %}>Community</a>
+      <a href="/app/konto" {% if path.startsWith('/app/konto') %}aria-current="page"{% endif %}>Konto &amp; Abo</a>
+      {% if user.isAdmin %}<a href="/admin" class="nav-sep">Adminbereich</a>{% endif %}
+    {% endif %}
+  </nav>
+  <div class="app-main">
+    {% if notice %}<p class="notice notice-{{ notice.kind }}" role="status">{{ notice.text }}</p>{% endif %}
+    {% block app %}{% endblock %}
+  </div>
+</div>
+{% endblock %}
+{% block footer %}
+<footer class="app-footer small muted">
+  <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a> · <a href="/agb">AGB</a> · <a href="/kuendigen">Verträge hier kündigen</a>
+</footer>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "layout/app.njk" %}
+{% block app %}
+<header class="app-head"><h1 class="h1">Kündigungen</h1><p class="muted">Alle Eingänge über „Verträge hier kündigen“. „manuelle_bearbeitung“ bitte prüfen.</p></header>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Eingang</th><th>Name</th><th>E-Mail</th><th>Art</th><th>Zeitpunkt</th><th>Ergebnis</th></tr></thead>
+  <tbody>
+  {% for r in rows %}<tr><td>{{ r.requested_at | date(true) }}</td><td>{{ r.name }}</td><td>{{ r.email }}</td><td>{{ r.kind }}</td><td>{{ r.wished_date or 'nächstmöglich' }}</td><td>{{ r.outcome }}</td></tr>{% else %}<tr><td colspan="6" class="muted">Keine Kündigungen.</td></tr>{% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

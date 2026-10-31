@@ -1,0 +1,16 @@
+{% extends "auth/_layout.njk" %}
+{% from "partials/macros.njk" import csrf with context %}
+{% block form %}
+<h1 class="h2">Passwort vergessen</h1>
+{% if sent %}
+  <p>Wenn es ein Konto mit dieser Adresse gibt, ist jetzt eine Mail mit einem Link unterwegs. Er ist eine Stunde gültig.</p>
+  <p><a class="btn" href="/login">Zum Login</a></p>
+{% else %}
+  <p>Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link, mit dem du ein neues Passwort festlegst.</p>
+  <form method="post" action="/passwort-vergessen" class="stack">
+    {{ csrf() }}
+    <label>E-Mail-Adresse<input type="email" name="email" required maxlength="254" autocomplete="email"></label>
+    <button class="btn btn-block" type="submit">Link anfordern</button>
+  </form>
+{% endif %}
+{% endblock %}

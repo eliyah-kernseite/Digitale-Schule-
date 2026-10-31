@@ -1,0 +1,17 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Willkommen</p>
+    {% if active %}
+      <h1 class="h1">Du bist drin. Jetzt zählt der erste Schritt.</h1>
+      <p class="lead">Mach zuerst deinen Selbsttest für Woche 0. Er dauert zwei Minuten und ist der Ausgangspunkt für dein Zeugnis. Danach wartet Seminar 1.</p>
+      <p class="actions"><a class="btn" href="/app/zeugnis#selbsttest">Selbsttest starten</a> <a class="btn btn-ghost" href="/app">Zur Übersicht</a></p>
+    {% else %}
+      <h1 class="h1">Danke! Deine Zahlung wird bestätigt.</h1>
+      <p class="lead">Das dauert meist nur wenige Sekunden. Lade die Seite gleich neu oder geh zu deiner Übersicht.</p>
+      <p><a class="btn" href="/app">Zur Übersicht</a></p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

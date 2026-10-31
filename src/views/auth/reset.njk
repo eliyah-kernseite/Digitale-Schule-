@@ -1,0 +1,14 @@
+{% extends "auth/_layout.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% block form %}
+<h1 class="h2">Neues Passwort</h1>
+{{ showErrors(errors) }}
+<form method="post" action="/passwort-neu/{{ token }}" class="stack">
+  {{ csrf() }}
+  <label>Neues Passwort <span class="muted small">(mindestens 10 Zeichen)</span><input type="password" name="password" required minlength="10" maxlength="200" autocomplete="new-password" data-strength></label>
+  <p class="strength small muted" aria-live="polite" hidden></p>
+  <label>Wiederholen<input type="password" name="password2" required minlength="10" maxlength="200" autocomplete="new-password"></label>
+  <button class="btn btn-block" type="submit">Passwort speichern</button>
+</form>
+{% endblock %}
+

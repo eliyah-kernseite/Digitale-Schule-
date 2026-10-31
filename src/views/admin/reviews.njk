@@ -1,0 +1,29 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf, stars with context %}
+{% block app %}
+<header class="app-head"><h1 class="h1">Bewertungen</h1></header>
+<nav class="tabs">
+  <a href="?status=pending" {% if status == 'pending' %}aria-current="page"{% endif %}>Zu prüfen</a>
+  <a href="?status=approved" {% if status == 'approved' %}aria-current="page"{% endif %}>Veröffentlicht</a>
+  <a href="?status=hidden" {% if status == 'hidden' %}aria-current="page"{% endif %}>Ausgeblendet</a>
+</nav>
+{% for r in rows %}
+<article class="panel cut review-row">
+  <p>{{ stars(r.rating) }} <span class="small muted">{{ r.first_name }} ({{ r.email }}) · {{ r.seminar_title or 'Schule allgemein' }} · {{ r.updated_at | date(true) }}</span></p>
+  {% if r.comment %}<blockquote>{{ r.comment }}</blockquote>{% endif %}
+  <div class="actions">
+    {% for st in [['approved', 'Veröffentlichen'], ['hidden', 'Ausblenden'], ['pending', 'Zurück auf prüfen']] %}{% if st[0] != status %}
+    <form method="post" action="/admin/bewertungen/{{ r.id }}" class="inline-form">{{ csrf() }}<input type="hidden" name="status" value="{{ st[0] }}"><input type="hidden" name="back" value="{{ status }}"><button class="btn btn-ghost btn-small" type="submit">{{ st[1] }}</button></form>
+    {% endif %}{% endfor %}
+  </div>
+</article>
+{% else %}<p class="muted">Nichts in dieser Liste.</p>{% endfor %}
+{% if summary.length %}
+<section class="panel cut">
+  <h2 class="h3">Durchschnitt pro Seminar</h2>
+  <table class="table"><thead><tr><th>#</th><th>Seminar</th><th>Ø</th><th>Anzahl</th></tr></thead><tbody>
+  {% for s in summary %}<tr><td>{{ s.position }}</td><td>{{ s.title }}</td><td>{{ s.avg }} ★</td><td>{{ s.n }}</td></tr>{% endfor %}
+  </tbody></table>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,13 @@
+<div class="curriculum">
+  {% for b in blocks %}
+  <section class="block cut">
+    <p class="block-num">Block {{ loop.index }}</p>
+    <h3 class="h3">{{ b.title }}</h3>
+    <ol class="block-list">
+      {% for s in b.seminars %}
+      <li><span class="num">{{ s.position | pad2 }}</span><span>{{ s.title }}</span></li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endfor %}
+</div>

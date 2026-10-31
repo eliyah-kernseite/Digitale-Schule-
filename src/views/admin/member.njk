@@ -1,0 +1,38 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf with context %}
+{% macro act(action, label, cls='btn-ghost') %}
+<form method="post" action="/admin/mitglieder/{{ member.id }}" class="inline-form">{{ csrf() }}<input type="hidden" name="action" value="{{ action }}"><button class="btn {{ cls }} btn-small" type="submit">{{ label }}</button></form>
+{% endmacro %}
+{% block app %}
+<header class="app-head">
+  <p class="eyebrow"><a href="/admin/mitglieder">Mitglieder</a></p>
+  <h1 class="h2">{{ member.first_name }}</h1>
+  <p class="muted">{{ member.email }} · Rolle: {{ member.role }} · Zugang: {{ 'ja' if access else 'nein' }} · 2FA: {{ 'an' if member.totp_enabled else 'aus' }}</p>
+</header>
+<section class="panel cut">
+  <h2 class="h3">Abo</h2>
+  {% if sub %}<p>{{ sub.provider }} · {{ sub.status }}{% if sub.current_period_end %} · bis {{ sub.current_period_end | date }}{% endif %}{% if sub.cancel_at_period_end %} · gekündigt{% endif %}</p>{% else %}<p class="muted">Kein Abo.</p>{% endif %}
+  <form method="post" action="/admin/mitglieder/{{ member.id }}" class="filter">
+    {{ csrf() }}<input type="hidden" name="action" value="comp">
+    <label>Freizugang (Tage, 0 = entfernen)<input type="number" name="days" min="0" max="3650" value="0"></label>
+    <button class="btn btn-small" type="submit">Setzen</button>
+  </form>
+  {% if member.comp_access_until %}<p class="small muted">Freizugang bis {{ member.comp_access_until | date }}</p>{% endif %}
+</section>
+<section class="panel cut">
+  <h2 class="h3">Aktionen</h2>
+  <div class="actions">
+    {% if member.disabled_at %}{{ act('enable', 'Entsperren') }}{% elif member.id != user.id %}{{ act('disable', 'Sperren', 'btn-danger') }}{% endif %}
+    {% if not member.email_verified_at %}{{ act('verify', 'E-Mail als bestätigt markieren') }}{% endif %}
+    {% if member.role == 'member' %}{{ act('make-admin', 'Zum Admin machen') }}{% elif member.id != user.id %}{{ act('make-member', 'Admin-Rechte entziehen') }}{% endif %}
+    {% if member.totp_enabled and member.id != user.id %}{{ act('reset-2fa', '2FA zurücksetzen') }}{% endif %}
+  </div>
+</section>
+<section class="panel cut">
+  <h2 class="h3">Fortschritt</h2>
+  <p>Streak: {{ streak.current }} Tage (bester: {{ streak.best }}){% if tests.week0 %} · Selbsttest Woche 0 am {{ tests.week0.created_at | date }}{% endif %}{% if tests.week12 %} · Woche 12 am {{ tests.week12.created_at | date }}{% endif %}</p>
+  {% for s in submissions %}
+  <article class="submission"><p class="small muted">{{ s.submitted_at | date(true) }} · {{ s.title }}</p><blockquote>{{ s.content }}</blockquote></article>
+  {% else %}<p class="muted">Noch keine Abgaben.</p>{% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% block app %}
+<header class="app-head">
+  <p class="eyebrow"><a href="/admin/seminare">Seminare</a></p>
+  <h1 class="h2">{{ seminar.title or 'Neues Seminar' }}</h1>
+  {% if seminar.id %}<p class="muted">{{ submissions }} Abgaben{% if rating and rating.n %} · Ø {{ rating.avg }} ★ aus {{ rating.n }} Bewertungen{% endif %} · <a href="/app/seminare/{{ seminar.id }}">Vorschau</a> · <a href="/admin/aufgaben?seminar={{ seminar.id }}">Abgaben ansehen</a></p>{% endif %}
+</header>
+{{ showErrors(errors) }}
+<form method="post" action="/admin/seminare{% if seminar.id %}/{{ seminar.id }}{% endif %}" class="panel cut stack">
+  {{ csrf() }}
+  <div class="form-grid">
+    <label>Fach
+      <select name="subject_id" {% if seminar.id %}disabled{% endif %}>
+        {% for s in subjects %}<option value="{{ s.id }}" {% if s.id == seminar.subject_id %}selected{% endif %}>{{ s.title }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Position (Reihenfolge)<input type="number" name="position" value="{{ seminar.position }}" min="1" max="999" required></label>
+    <label>Block<input name="block_title" value="{{ seminar.block_title }}" maxlength="60"></label>
+    <label>Videolänge in Sekunden<input type="number" name="video_duration" value="{{ seminar.video_duration or '' }}" min="0" max="21600"><span class="small muted">Wird beim Upload automatisch erkannt, wenn möglich.</span></label>
+  </div>
+  <label>Titel<input name="title" value="{{ seminar.title }}" required maxlength="120"></label>
+  <label>Kurzbeschreibung<textarea name="summary" rows="2" maxlength="500">{{ seminar.summary }}</textarea></label>
+  <div class="form-grid">
+    <label>Aufgabentyp
+      <select name="task_type"><option value="text" {% if seminar.task_type == 'text' %}selected{% endif %}>Textfeld</option><option value="check" {% if seminar.task_type == 'check' %}selected{% endif %}>Abhaken</option></select>
+    </label>
+  </div>
+  <label>Aufgabe<textarea name="task_prompt" rows="3" maxlength="1000" required>{{ seminar.task_prompt }}</textarea></label>
+  <label>Kapitelmarken <span class="small muted">(eine pro Zeile, z. B. „02:30 Das Selbstbild“)</span><textarea name="chapters" rows="4" maxlength="3000">{{ seminar.chapters_text }}</textarea></label>
+  {% if seminar.id %}<label class="check"><input type="checkbox" name="published" {% if seminar.published %}checked{% endif %}> <span>Veröffentlicht (für Mitglieder sichtbar)</span></label>{% endif %}
+  <button class="btn" type="submit">Speichern</button>
+</form>
+
+{% if seminar.id %}
+<form method="post" action="/admin/seminare/{{ seminar.id }}/video" enctype="multipart/form-data" class="panel cut stack">
+  {{ csrf() }}
+  <h2 class="h3">Video</h2>
+  <p>{% if seminar.video_file %}Aktuelles Video: {{ seminar.video_duration | duration }} Min. Ein neuer Upload ersetzt es.{% else %}Noch kein Video hinterlegt.{% endif %}</p>
+  <label>Datei (MP4 oder WebM)<input type="file" name="video" accept="video/mp4,video/webm" required></label>
+  <button class="btn btn-small" type="submit">Hochladen</button>
+</form>
+<form method="post" action="/admin/seminare/{{ seminar.id }}/loeschen" class="panel cut stack danger">
+  {{ csrf() }}
+  <h2 class="h4">Seminar löschen</h2>
+  <p class="small">Löscht auch alle Abgaben und Fortschritte zu diesem Seminar.</p>
+  <label>Tippe LÖSCHEN<input name="confirm" maxlength="20" autocomplete="off" required></label>
+  <button class="btn btn-danger btn-small" type="submit">Endgültig löschen</button>
+</form>
+{% endif %}
+{% endblock %}

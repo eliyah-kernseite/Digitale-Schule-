@@ -1,0 +1,150 @@
+{% extends "layout/base.njk" %}
+{% from "partials/macros.njk" import stars with context %}
+{% block main %}
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Die digitale Schule für Männer</p>
+      <h1 class="display">Werde der Mann, <span class="accent-line">der du sein kannst.</span></h1>
+      <p class="lead">Persönlichkeit, Geld und Fitness. Echter Unterricht mit Lehrern, Aufgaben und einem Zeugnis, das deinen Fortschritt zeigt.</p>
+      <div class="actions">
+        <a class="btn" href="/mitgliedschaft">Jetzt Mitglied werden</a>
+        <a class="btn btn-ghost" href="#lehrplan">Lehrplan ansehen</a>
+      </div>
+    </div>
+    <aside class="hero-visual" aria-label="So sieht dein Unterricht aus">
+      <div class="timetable cut">
+        <div class="timetable-head">
+          <span class="eyebrow">Dein Stundenplan</span>
+          <span class="chip">Grundstufe</span>
+        </div>
+        {% for b in blocks %}
+        <div class="tt-row {% if loop.first %}is-now{% endif %}">
+          <span class="tt-week">Block {{ loop.index }}</span>
+          <span class="tt-title">{{ b.title }}</span>
+          <span class="tt-state">{% if loop.first %}läuft{% else %}gesperrt{% endif %}</span>
+        </div>
+        {% endfor %}
+        <p class="tt-foot">Nächstes Seminar öffnet nach deiner Aufgabe.</p>
+      </div>
+    </aside>
+  </div>
+  <div class="wrap hero-facts">
+    <div><strong>{{ total }}</strong><span>Seminare in der Grundstufe</span></div>
+    <div><strong>1</strong><span>Aufgabe pro Seminar</span></div>
+    <div><strong>12</strong><span>Wochen bis zu deinem Zeugnis</span></div>
+  </div>
+</section>
+
+<section class="section" id="faecher">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 class="h2">Deine Fächer</h2>
+      <p class="lead">Drei Bereiche, ein Ziel: ein starkes Leben.</p>
+    </header>
+    <div class="cards cards-3">
+      {% for s in subjects %}
+      <article class="card cut {% if s.status == 'live' %}card-live{% endif %}">
+        <p class="chip {% if s.status == 'live' %}chip-live{% endif %}">{{ 'Jetzt verfügbar' if s.status == 'live' else 'Bald verfügbar' }}</p>
+        <h3 class="h3">{{ s.title }}</h3>
+        <p>{{ s.tagline }} {{ s.description | truncate(150) }}</p>
+        <a class="link-arrow" href="/faecher/{{ s.slug }}">{{ 'Mehr erfahren' if s.status == 'live' else 'Auf die Warteliste' }}</a>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-light" id="so-gehts">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 class="h2">So funktioniert’s</h2>
+      <p class="lead">Kein Netzwerk zum Durchscrollen. Unterricht mit Reihenfolge.</p>
+    </header>
+    <ol class="steps">
+      <li><span class="step-num">01</span><h3 class="h4">Seminar ansehen</h3><p>Kurze Videoseminare von deinem Lehrer. Ohne Vorspulen, damit nichts verloren geht.</p></li>
+      <li><span class="step-num">02</span><h3 class="h4">Aufgabe erledigen</h3><p>Jedes Seminar endet mit einer Übung für deinen Alltag.</p></li>
+      <li><span class="step-num">03</span><h3 class="h4">Nächstes freischalten</h3><p>Erst die Aufgabe, dann das nächste Seminar. So baut eins aufs andere auf.</p></li>
+      <li><span class="step-num">04</span><h3 class="h4">Fortschritt sehen</h3><p>Dein Zeugnis zeigt schwarz auf weiß, wie du wächst.</p></li>
+    </ol>
+    <p><a class="link-arrow" href="/so-funktionierts">Alles zum Ablauf im Detail</a></p>
+  </div>
+</section>
+
+<section class="section" id="lehrplan">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 class="h2">Der Lehrplan: {{ main.level_title }}</h2>
+      <p class="lead">{{ total }} Seminare in {{ blocks.length }} Blöcken. Du lernst in deinem Tempo, in fester Reihenfolge.</p>
+    </header>
+    {% include "partials/curriculum-grid.njk" %}
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap two-col">
+    <article class="teacher cut">
+      <div class="teacher-photo" aria-hidden="true"><span>{{ main.teacher_name | initial }}</span></div>
+      <div>
+        <p class="eyebrow">Dein Lehrer</p>
+        <h3 class="h3">{{ main.teacher_name }}</h3>
+        <p class="muted">{{ main.title }}</p>
+        <p>{{ main.teacher_bio }}</p>
+      </div>
+    </article>
+    <article class="community-teaser">
+      <p class="eyebrow">Community</p>
+      <h3 class="h3">Lerne nicht allein.</h3>
+      <p>In unserer Telegram-Community hilfst du anderen und bekommst Hilfe. Exklusive Inhalte der Lehrer gibt es nur dort.</p>
+      <ul class="ritual">
+        <li><strong>Montag</strong> Wochenziel posten</li>
+        <li><strong>Freitag</strong> Ergebnis teilen</li>
+      </ul>
+      <a class="link-arrow" href="/community">Wie die Community funktioniert</a>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap two-col">
+    {% include "partials/report-example.njk" %}
+    {% include "partials/membership-card.njk" %}
+  </div>
+</section>
+
+{% if reviews.length %}
+<section class="section section-light">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 class="h2">Was Schüler sagen</h2>
+      {% if reviewStats.n >= 3 %}<p class="lead">{{ stars(reviewStats.avg | round) }} {{ reviewStats.avg }} von 5 aus {{ reviewStats.n }} Bewertungen</p>{% endif %}
+    </header>
+    <div class="cards cards-3">
+      {% for r in reviews %}
+      <figure class="quote cut">
+        {{ stars(r.rating) }}
+        <blockquote>{{ r.comment }}</blockquote>
+        <figcaption>{{ r.first_name }} · {{ r.done }} Seminare abgeschlossen · verifizierter Schüler</figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    <p class="small muted">Bewerten können nur Mitglieder, die mindestens drei Seminare abgeschlossen haben. Wir veröffentlichen positive wie kritische Bewertungen und entfernen nur Beleidigungen oder Spam.</p>
+  </div>
+</section>
+{% endif %}
+
+<section class="section" id="fragen">
+  <div class="wrap narrow">
+    <h2 class="h2">Häufige Fragen</h2>
+    {% include "partials/faq.njk" %}
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap cta-row">
+    <p class="display-sm">Der beste Zeitpunkt anzufangen ist heute.</p>
+    <a class="btn btn-dark" href="/mitgliedschaft">Jetzt Mitglied werden</a>
+  </div>
+</section>
+{% endblock %}

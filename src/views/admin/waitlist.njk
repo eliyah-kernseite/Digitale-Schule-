@@ -1,0 +1,10 @@
+{% extends "layout/app.njk" %}
+{% block app %}
+<header class="app-head"><h1 class="h1">Warteliste</h1><p><a class="btn btn-small" href="/admin/warteliste?format=csv">Bestätigte als CSV</a></p></header>
+<table class="table">
+  <thead><tr><th>E-Mail</th><th>Fach</th><th>Bestätigt</th><th>Eingetragen</th></tr></thead>
+  <tbody>
+  {% for r in rows %}<tr><td>{{ r.email }}</td><td>{{ r.subject_slug }}</td><td>{{ r.confirmed_at | date if r.confirmed_at else 'nein' }}</td><td>{{ r.created_at | date }}</td></tr>{% else %}<tr><td colspan="4" class="muted">Noch keine Einträge.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

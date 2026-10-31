@@ -1,0 +1,3 @@
+<ol class="streak-dots" aria-label="Die letzten 14 Tage">
+  {% for d in streak.last14 %}<li class="{{ 'on' if d.done else 'off' }}" title="{{ d.day | date }}{{ ': erledigt' if d.done else '' }}"></li>{% endfor %}
+</ol>

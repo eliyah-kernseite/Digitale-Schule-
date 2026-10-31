@@ -1,0 +1,15 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% block app %}
+<header class="app-head"><p class="eyebrow"><a href="/admin/beitraege">Beiträge</a></p><h1 class="h2">{{ post.title or 'Neuer Beitrag' }}</h1></header>
+{{ showErrors(errors) }}
+<form method="post" action="/admin/beitraege{% if post.id %}/{{ post.id }}{% endif %}" class="panel cut stack">
+  {{ csrf() }}
+  <label>Titel<input name="title" value="{{ post.title }}" required maxlength="160"></label>
+  <label>Anreißer<textarea name="excerpt" rows="2" maxlength="400">{{ post.excerpt }}</textarea></label>
+  <label>Text <span class="small muted">(Absätze durch Leerzeile trennen)</span><textarea name="body" rows="14" maxlength="20000" required>{{ post.body }}</textarea></label>
+  <label class="check"><input type="checkbox" name="publish" {% if post.published_at or post.publish %}checked{% endif %}> <span>Veröffentlichen</span></label>
+  <p class="small muted">Werbeaussagen beachten: keine Heilungs-, Einkommens- oder Erfolgsversprechen.</p>
+  <button class="btn" type="submit">Speichern</button>
+</form>
+{% endblock %}

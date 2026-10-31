@@ -1,0 +1,25 @@
+{% extends "layout/base.njk" %}
+{% from "partials/macros.njk" import csrf, errors as showErrors with context %}
+{% block main %}
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Kündigung</p>
+    <h1 class="h1">Verträge hier kündigen</h1>
+    <p class="lead">Du kannst deine Mitgliedschaft hier ohne Login kündigen. Du erhältst sofort eine Eingangsbestätigung per E-Mail.</p>
+    {{ showErrors(errors) }}
+    <form method="post" action="/kuendigen" class="panel cut stack">
+      {{ csrf() }}
+      <label>Vor- und Nachname<input name="name" value="{{ form.name }}" required maxlength="120" autocomplete="name"></label>
+      <label>E-Mail-Adresse deines Kontos<input type="email" name="email" value="{{ form.email }}" required maxlength="254" autocomplete="email"></label>
+      <fieldset class="radio-row">
+        <legend>Art der Kündigung</legend>
+        <label class="check"><input type="radio" name="kind" value="ordentlich" {% if form.kind != 'ausserordentlich' %}checked{% endif %}> <span>Ordentliche Kündigung</span></label>
+        <label class="check"><input type="radio" name="kind" value="ausserordentlich" {% if form.kind == 'ausserordentlich' %}checked{% endif %}> <span>Außerordentliche Kündigung</span></label>
+      </fieldset>
+      <label>Gewünschter Zeitpunkt <span class="muted small">(leer lassen für nächstmöglichen)</span><input type="date" name="wished_date" value="{{ form.wished_date }}"></label>
+      <label>Grund <span class="muted small">(nur bei außerordentlicher Kündigung nötig)</span><textarea name="reason" rows="3" maxlength="2000">{{ form.reason }}</textarea></label>
+      <button class="btn btn-block" type="submit">Jetzt kündigen</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "layout/app.njk" %}
+{% from "partials/macros.njk" import csrf, ratingInput with context %}
+{% macro testForm(week) %}
+<form method="post" action="/app/zeugnis/selbsttest" class="selftest stack">
+  {{ csrf() }}
+  <input type="hidden" name="week" value="{{ week }}">
+  {% for d in dimensions %}
+  <fieldset class="scale">
+    <legend>{{ d[1] }}</legend>
+    <div class="scale-row">
+      {% for i in range(1, 11) %}
+      <label><input type="radio" name="{{ d[0] }}" value="{{ i }}" required><span>{{ i }}</span></label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% endfor %}
+  <p class="small muted">1 = trifft gar nicht zu, 10 = trifft voll zu. Sei ehrlich, niemand außer dir und deinem Lehrer sieht das.</p>
+  <button class="btn" type="submit">Selbsttest speichern</button>
+</form>
+{% endmacro %}
+{% block app %}
+<header class="app-head report-head">
+  <div>
+    <p class="eyebrow">Zeugnis</p>
+    <h1 class="h1">{{ user.firstName }}</h1>
+  </div>
+  <div class="report-stats">
+    <div><strong>{{ totalDone }}</strong><span>Seminare</span></div>
+    <div><strong>{{ streak.current }}</strong><span>Tage Streak</span></div>
+    <div><strong>{{ streak.best }}</strong><span>Bester Streak</span></div>
+  </div>
+</header>
+
+<section class="panel cut" id="selbsttest">
+  <h2 class="h3">Selbsttest</h2>
+  {% if not tests.week0 %}
+    <p>Woche 0: Wo stehst du heute? Das ist dein Ausgangspunkt.</p>
+    {{ testForm(0) }}
+  {% else %}
+    <div class="report-compare">
+      {% for d in dimensions %}
+      <div class="compare-row">
+        <span class="report-label">{{ d[1] }}</span>
+        <svg viewBox="0 0 100 14" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="0" y="1" width="100" height="12" class="trk"/>
+          <rect x="0" y="1" width="{{ tests.week0[d[0]] * 10 }}" height="5" class="w0"/>
+          {% if tests.week12 %}<rect x="0" y="8" width="{{ tests.week12[d[0]] * 10 }}" height="5" class="w12"/>{% endif %}
+        </svg>
+        <span class="report-vals">{{ tests.week0[d[0]] }}{% if tests.week12 %} → {{ tests.week12[d[0]] }}{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="small muted"><span class="key key-w0"></span> Woche 0 ({{ tests.week0.created_at | date }}){% if tests.week12 %} &nbsp; <span class="key key-w12"></span> Woche 12 ({{ tests.week12.created_at | date }}){% endif %}</p>
+    {% if tests.week12Open %}
+      <h3 class="h4">Woche 12: Wie stehst du heute da?</h3>
+      {{ testForm(12) }}
+    {% elif not tests.week12 %}
+      <p class="muted">Der zweite Selbsttest öffnet sich am {{ tests.week12OpensAt | date }}. Bis dahin: dranbleiben.</p>
+    {% endif %}
+  {% endif %}
+</section>
+
+<div class="dash-grid">
+  <section class="panel cut" id="ziel">
+    <h2 class="h3">Mein Ziel</h2>
+    <form method="post" action="/app/zeugnis/ziel" class="stack">
+      {{ csrf() }}
+      <label class="sr-only" for="goal">Dein persönliches Ziel</label>
+      <textarea id="goal" name="goal" rows="3" maxlength="500" minlength="5" required placeholder="Was willst du in zwölf Wochen erreicht haben?">{{ goal.text if goal else '' }}</textarea>
+      <button class="btn btn-small" type="submit">{{ 'Ziel aktualisieren' if goal else 'Ziel speichern' }}</button>
+    </form>
+  </section>
+  <section class="panel cut" id="routine">
+    <h2 class="h3">Routine</h2>
+    <p class="streak"><strong>{{ streak.current }}</strong> {{ 'Tag' if streak.current == 1 else 'Tage' }} in Folge</p>
+    {% include "partials/streak-dots.njk" %}
+    {% if streak.checkedToday %}
+      <p class="small">Heute schon erledigt. Stark.</p>
+    {% else %}
+      <form method="post" action="/app/zeugnis/routine">{{ csrf() }}<button class="btn btn-small" type="submit">Routine heute erledigt</button></form>
+    {% endif %}
+  </section>
+</div>
+
+<section class="panel cut">
+  <h2 class="h3">Abgeschlossene Seminare</h2>
+  {% for c in courses %}
+    <p class="small muted">{{ c.subject.title }}: {{ c.done }} von {{ c.total }}</p>
+    <ol class="done-list">
+      {% for s in c.items %}{% if s.state == 'done' %}<li><span class="num">{{ s.number | pad2 }}</span> {{ s.title }} <span class="small muted">· {{ s.submitted_at | date }}</span></li>{% endif %}{% endfor %}
+    </ol>
+  {% endfor %}
+  <p><button class="btn btn-ghost btn-small" type="button" data-print>Zeugnis drucken</button></p>
+</section>
+
+<section class="panel cut" id="bewertung">
+  <h2 class="h3">Die Schule bewerten</h2>
+  {% if canReview %}
+    <p>Deine ehrliche Meinung hilft anderen bei der Entscheidung und uns beim Besserwerden. Nach Prüfung kann sie auf der Startseite erscheinen (mit Vorname).</p>
+    <form method="post" action="/app/zeugnis/bewertung" class="stack">
+      {{ csrf() }}
+      {{ ratingInput('rating', schoolReview.rating if schoolReview else 0) }}
+      <textarea name="comment" rows="3" maxlength="1000" placeholder="Was hat sich für dich verändert?">{{ schoolReview.comment if schoolReview else '' }}</textarea>
+      <button class="btn btn-small" type="submit">{{ 'Bewertung ändern' if schoolReview else 'Bewertung abgeben' }}</button>
+      {% if schoolReview %}<p class="small muted">Status: {% if schoolReview.status == 'approved' %}veröffentlicht{% elif schoolReview.status == 'hidden' %}nicht veröffentlicht{% else %}wird geprüft{% endif %}</p>{% endif %}
+    </form>
+  {% else %}
+    <p class="muted">Bewerten kannst du, sobald du drei Seminare abgeschlossen hast. So stammen alle Bewertungen von echten Schülern.</p>
+  {% endif %}
+</section>
+{% endblock %}
+

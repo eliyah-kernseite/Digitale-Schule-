@@ -1,0 +1,19 @@
+{% extends "layout/base.njk" %}
+{% block main %}
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Warteliste{% if subject %} · {{ subject.title }}{% endif %}</p>
+    {% if confirmed %}
+      <h1 class="h1">Du bist dabei.</h1>
+      <p class="lead">Deine Eintragung ist bestätigt. Sobald das Fach startet, hörst du als Erstes von uns.</p>
+    {% elif sent %}
+      <h1 class="h1">Ein Klick noch.</h1>
+      <p class="lead">Wir haben dir eine Mail geschickt. Bestätige den Link darin, dann bist du auf der Warteliste.</p>
+    {% else %}
+      <h1 class="h1">Das hat nicht geklappt.</h1>
+      <p class="lead">{{ error }}</p>
+      {% if subject %}<p><a class="btn" href="/faecher/{{ subject.slug }}">Zurück zum Fach</a></p>{% endif %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
