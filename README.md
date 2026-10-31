@@ -18,6 +18,10 @@ Ohne weitere Einstellungen läuft alles im **Testmodus**: Zahlungen werden simul
 Tests: `npm test` (35 Tests: Login, 2FA, CSRF, XSS, Rate-Limits, Reihenfolge der
 Seminare, Anti-Vorspulen, Zahlung inkl. Stripe-Webhook, Kündigung, Admin, Uploads).
 
+## Vorschau auf GitHub Pages
+
+GitHub Pages kann keinen Node-Server ausführen. Deshalb gibt es eine statische Vorschau in `docs/` (öffentliche Seiten plus ein Beispiel-Mitgliederbereich mit Demo-Daten). Neu erzeugen mit `npm run build:static`. In den Pages-Einstellungen entweder `main` / `/docs` oder `main` / Root wählen (die `index.html` im Root leitet nach `docs/` weiter). Login, Zahlung, Formulare und Videos funktionieren nur auf dem echten Server.
+
 ## Was drin ist
 
 **Öffentliche Seiten:** Startseite (alle Abschnitte aus dem Briefing), Fächer und
